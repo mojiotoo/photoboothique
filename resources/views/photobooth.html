@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photobooth</title>
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/home.css">
+</head>
+<body>
+    <div class="background">
+        <img src="/assets/flower1.png" alt="Background Image" class="flower1-image">
+        <img src="/assets/flower2.png" alt="Background Image" class="flower2-image">
+    </div>
+
+    <nav id="navbar">
+        <img src="/assets/logo.png" alt="Logo" class="logo-image">
+        <ul id="nav-menu">
+            <li><a href="home.html" >Home</a></li>
+            <li><a href="photobooth.html" class="active">Photobooth</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+            <button class="hamburger" onclick="toggleMenu()">☰</button>
+        </div>
+    </nav>
+
+    <main>
+ 
+    </main>
+
+    <footer>
+        <div class="footer-top">
+            <div class="footer-brand">
+            <img src="/assets/footer.png" alt="Logo" class="footer-logo">
+            <p>Your online photobooth bestie<br>p.boothique@gmail.com<br>+62 1234 5678 9012</p>
+            </div>
+
+            <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="photobooth.html">Photobooth</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="login.html">Login/Register</a></li>
+            </ul>
+            </div>
+
+            <div class="footer-col">
+            <h4>Support</h4>
+            <ul>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Whatsapp</a></li>
+                <li><a href="#">Help Center</a></li>
+                <li><a href="#">Forum</a></li>
+            </ul>
+            </div>
+
+            <img src="/assets/stars-footer.png" alt="stars" class="stars-footer">
+        </div>
+
+        <hr class="footer-divider">
+        <p class="footer-copy">© 2026 PhotoBoothique. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
