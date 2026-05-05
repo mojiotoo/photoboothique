@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+    <div class="background">
+        <img src="/assets/flower1.png" alt="Background Image" class="flower1-image">
+        <img src="/assets/flower2.png" alt="Background Image" class="flower2-image">
+    </div>
+
+    <nav id="navbar">
+        <img src="/assets/logo.png" alt="Logo" class="logo-image">
+        <ul id="nav-menu">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="photobooth.html">Photobooth</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+            <button class="hamburger" onclick="toggleMenu()">☰</button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="box"> 
+            <img src="/assets/login-pic.png" alt="login-picture" class="login-picture">
+            <div class="login-content">
+                <h1 id="title">Welcome!</h1>
+                <p id="subtitle">Login now to save your strips to our cloud gallery</p>
+                <form>
+                    <input type="email" placeholder="Email" class="input-field">
+                    <input type="password" placeholder="Password" class="input-field">
+                </form>
+                <ticket class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Remember Me</label>
+                </ticket>
+                <a href="#" class="forgot-link" onclick="window.location.href='forgot-password.html'">Forgot Password?</a>
+                <button class="loginNow-btn" onclick="window.location.href='home.html'">Login Now</button>
+                <button class="register-btn" onclick="window.location.href='register.html'">Sign Up</button>
+                <p>or login with</p>
+                <button class="google-login-btn">Login with Google</button>
+            </div>
+        </div>
+    </main>
+
+    
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

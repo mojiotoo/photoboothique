@@ -1,0 +1,135 @@
+/* ===== FRAME SECTION WRAPPER ===== */
+.frame-section-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+    gap: 30px;
+}
+
+/* ===== FRAME SELECTION GRID ===== */
+.frame-selection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 24px;
+    padding: 32px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(220, 170, 200, 0.18);
+    max-width: 1200px;
+    width: 100%;
+}
+
+/* ===== FRAME CARD ===== */
+.frame-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px 20px 18px;
+    cursor: pointer;
+    border: 2px solid;
+    border-color: #C28CFF;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    width: 160px;
+    min-height: 260px;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(200, 150, 180, 0.12);
+}
+
+.frame-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 28px rgba(200, 130, 170, 0.22);
+    border-color: #e8a0c0;
+}
+
+.frame-card.selected {
+    border-color: #d47fa6;
+    box-shadow: 0 0 0 3px rgba(212, 127, 166, 0.25);
+}
+
+.frame-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    background: linear-gradient(135deg, #C28CFF, #FFABD1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    margin: 0;
+    text-align: center;
+    letter-spacing: 0.2px;
+}
+
+.frame-preview {
+    display: block;
+    width: 130px;
+    height: 200px;
+    margin: 0 auto;
+    object-fit: contain;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+/* ===== CTA ROW (stickers + choose text) ===== */
+.frame-cta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.choose-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 26px;
+    color: #e07ab0;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.sticker-left,
+.sticker-right {
+    width: 80px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+    .frame-selection {
+        gap: 14px;
+        padding: 20px 14px;
+    }
+
+    .frame-card {
+        width: 130px;
+        padding: 18px 14px 14px;
+    }
+
+    .classic-baby-pink,
+    .everyday-white {
+        height: 160px;
+    }
+
+    .shimmer-pink,
+    .og-black {
+        width: 90px;
+        height: 160px;
+    }
+
+    .choose-text {
+        font-size: 20px;
+    }
+
+    .sticker-left,
+    .sticker-right {
+        width: 60px;
+    }
+}

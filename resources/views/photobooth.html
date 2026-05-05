@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photobooth</title>
     <link rel="stylesheet" href="../css/layout.css">
-    <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/photobooth.css">
 </head>
 <body>
     <div class="background">
@@ -27,7 +27,7 @@
     </nav>
 
     <main>
- 
+   
     </main>
 
     <footer>
@@ -68,6 +68,17 @@
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
+        }
+    </script>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const frameKey = params.get('frame') || sessionStorage.getItem('selectedFrame') || 'classic-baby-pink';
+        if (frameKey) {
+            const frameCard = document.querySelector(`.frame-card[onclick="selectFrame('${frameKey}')"]`);
+            if (frameCard) {
+                frameCard.classList.add('selected');
+            }
         }
     </script>
 </body>
