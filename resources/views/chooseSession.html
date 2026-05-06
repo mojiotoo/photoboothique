@@ -28,36 +28,38 @@
     </nav>
 
     <main>
-    <div class="box">
-        <div class="frame-section-wrapper">
-            <div class="frame-selection">
-                <div class="frame-card" onclick="selectFrame('classic-baby-pink', this)">
-                    <img src="/assets/classicbabypink.png" alt="Classic Baby Pink" class="frame-preview classic-baby-pink">
-                    <p class="frame-name">Classic Baby Pink</p>
+        <div class="box">
+            <div class="frame-section-wrapper">
+                <div class="pick-container">
+                    <span class="deco-star">✦</span>
+                    <span class="deco-star">✦</span>
+                    <span class="deco-star">✦</span>
+ 
+                    <div class="pick-cards">
+                        <a class="pick-card" href="photobooth.html">
+                            <div class="pick-card-icon">
+                                <img src="/assets/photoboothicon.png" alt="Photobooth" class="pick-card-img">
+                            </div>
+                            <div class="pick-card-label">Photobooth</div>
+                        </a>
+ 
+                        <a class="pick-card" href="uploadphoto.html">
+                            <div class="pick-card-icon">
+                                <img src="/assets/uploadphotoicon.png" alt="Upload Photo" class="pick-card-img">
+                            </div>
+                            <div class="pick-card-label">Upload Photo</div>
+                        </a>
+                    </div>
                 </div>
-
-                <div class="frame-card" onclick="selectFrame('everyday-white', this)">
-                    <img src="/assets/everydaywhite.png" alt="Everyday White" class="frame-preview everyday-white">
-                    <p class="frame-name">Everyday White</p>
+ 
+                <div class="frame-cta">
+                    <img src="/assets/mymelody1.png" alt="My Melody" class="sticker-left">
+                    <h1 class="choose-text">Choose your pick!</h1>
+                    <img src="/assets/mymelody2.png" alt="My Melody" class="sticker-right">
                 </div>
-
-                <div class="frame-card" onclick="selectFrame('shimmer-pink', this)">
-                    <img src="/assets/shimmer-pink.png" alt="Shimmer Pink" class="frame-preview shimmer-pink">
-                    <p class="frame-name">Shimmer Pink</p>
-                </div>
-
-                <div class="frame-card" onclick="selectFrame('og-black', this)">
-                    <img src="/assets/ogblack.png" alt="OG Black" class="frame-preview og-black">
-                    <p class="frame-name">OG Black</p>
-                </div>
-            </div>
-            <div class="frame-cta">
-                <img src="/assets/mymelody1.png" alt="My Melody" class="sticker-left">
-                <h1 class="choose-text">Choose a frame!</h1>
-                <img src="/assets/mymelody2.png" alt="My Melody" class="sticker-right">
+ 
             </div>
         </div>
-    </div>
     </main>
 
     <footer>
@@ -106,7 +108,7 @@
             document.querySelectorAll('.frame-card').forEach(card => card.classList.remove('selected'));
             el.classList.add('selected');
             sessionStorage.setItem('selectedFrame', frameId);
-            window.location.href = `chooseSession.html?frame=${frameId}`;
+            window.location.href = `photobooth.html?frame=${frameId}`;
         }
     </script>
 

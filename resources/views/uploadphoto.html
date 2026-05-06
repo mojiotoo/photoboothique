@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photobooth</title>
     <link rel="stylesheet" href="../css/layout.css">
-    <link rel="stylesheet" href="../css/photobooth.css">
+    <link rel="stylesheet" href="../css/uploadphoto.css">
 </head>
 <body>
     <div class="background">
@@ -27,21 +27,21 @@
     </nav>
 
     <main>
-        <!-- LEFT: Camera panel -->
-        <div class="camera-panel">
+
+        <!-- LEFT: Upload panel -->
+        <div class="upload-panel">
 
             <!-- Header -->
             <div class="panel-header">
-                <span class="panel-title">Camera &amp; Filters</span>
-                <div class="camera-status off" id="cameraStatus">
-                    <span class="dot"></span>
-                    <span id="statusText">Camera Off</span>
-                </div>
+                <span class="panel-title">Upload &amp; Filters</span>
+                <div class="photo-counter-badge" id="counterBadge">0 / 4</div>
             </div>
 
-            <!-- Video feed -->
-            <div class="video-wrapper">
-                <video id="cameraFeed" autoplay playsinline></video>
+            <!-- Preview area -->
+            <div class="preview-wrapper">
+
+                <!-- Actual preview image (shown after upload) -->
+                <img id="previewImg" alt="Preview">
 
                 <!-- Corner bracket decorations -->
                 <div class="corner tl"></div>
@@ -49,22 +49,29 @@
                 <div class="corner bl"></div>
                 <div class="corner br"></div>
 
-                <!-- Countdown number -->
-                <div class="countdown-overlay" id="countdownOverlay"></div>
+                <!-- Previous / Next nav arrows -->
+                <button class="preview-nav prev" id="prevNav">‹</button>
+                <button class="preview-nav next" id="nextNav">›</button>
 
-                <!-- White flash on capture -->
-                <div class="flash-overlay" id="flashOverlay"></div>
+                <!-- Dot indicators -->
+                <div class="slot-dots" id="slotDots"></div>
 
-                <!-- Shown when camera is off -->
-                <div class="no-camera" id="noCameraMsg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                        <circle cx="12" cy="13" r="4"/>
-                        <line x1="2" y1="2" x2="22" y2="22" stroke="rgba(255,255,255,0.4)"/>
-                    </svg>
-                    <span>Camera access required</span>
-                    <button onclick="startCamera()">Enable Camera</button>
+                <!-- Drop / empty state (shown when no photos yet) -->
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <p class="drop-text-primary">Drop photos here</p>
+                    <p class="drop-text-secondary">or click to browse your files</p>
+                    <button class="drop-browse-btn" onclick="event.stopPropagation(); openFilePicker()">
+                        Browse Files
+                    </button>
                 </div>
+
             </div>
 
             <!-- Filters -->
@@ -83,8 +90,8 @@
             <!-- Action buttons -->
             <div class="actions-row">
                 <button class="btn-back" onclick="history.back()">← Back</button>
-                <button class="btn-take-photo" id="takePhotoBtn" onclick="startCountdown()" disabled>
-                    Take Photo
+                <button class="btn-add-photo" id="addPhotoBtn" onclick="openFilePicker()">
+                    + Add Photo (0/4)
                 </button>
                 <button class="btn-next" id="nextBtn" onclick="goNext()">Next →</button>
             </div>
@@ -94,7 +101,7 @@
         <!-- RIGHT: Photo strip -->
         <div class="strip-panel">
             <div class="strip-panel-header">
-                <span class="strip-title" id="stripTitle">Photos</span>
+                <span class="strip-title">Photos</span>
                 <span class="strip-count" id="stripCount">0 / 4</span>
             </div>
 
@@ -110,9 +117,16 @@
 
     </main>
 
-    <!-- Hidden canvas for capturing frames -->
+    <!-- Hidden canvas for filter processing -->
     <canvas id="captureCanvas"></canvas>
 
+    <!-- Hidden file input — accepts images only, multiple selection -->
+    <input
+        type="file"
+        id="fileInput"
+        accept="image/*"
+        multiple
+    >
     <footer>
         <div class="footer-top">
             <div class="footer-brand">
@@ -154,6 +168,6 @@
         }
     </script>
 
-    <script src="../js/photobooth.js"></script>
+    <script src="../js/uploadphoto.js"></script>
 </body>
 </html>

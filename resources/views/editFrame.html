@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Session</title>
+    <title>Photobooth</title>
     <link rel="stylesheet" href="../css/layout.css">
-    <link rel="stylesheet" href="../css/home.css">
-    <link rel="stylesheet" href="../css/session.css">
+    <link rel="stylesheet" href="../css/editFrame.css">
 </head>
 <body>
     <div class="background">
@@ -17,8 +16,8 @@
     <nav id="navbar">
         <img src="/assets/logo.png" alt="Logo" class="logo-image">
         <ul id="nav-menu">
-            <li><a href="home.html" class="active">Home</a></li>
-            <li><a href="photobooth.html">Photobooth</a></li>
+            <li><a href="home.html" >Home</a></li>
+            <li><a href="photobooth.html" class="active">Photobooth</a></li>
             <li><a href="gallery.html">Gallery</a></li>
         </ul>
         <div class="nav-right">
@@ -28,37 +27,12 @@
     </nav>
 
     <main>
-    <div class="box">
-        <div class="frame-section-wrapper">
-            <div class="frame-selection">
-                <div class="frame-card" onclick="selectFrame('classic-baby-pink', this)">
-                    <img src="/assets/classicbabypink.png" alt="Classic Baby Pink" class="frame-preview classic-baby-pink">
-                    <p class="frame-name">Classic Baby Pink</p>
-                </div>
 
-                <div class="frame-card" onclick="selectFrame('everyday-white', this)">
-                    <img src="/assets/everydaywhite.png" alt="Everyday White" class="frame-preview everyday-white">
-                    <p class="frame-name">Everyday White</p>
-                </div>
 
-                <div class="frame-card" onclick="selectFrame('shimmer-pink', this)">
-                    <img src="/assets/shimmer-pink.png" alt="Shimmer Pink" class="frame-preview shimmer-pink">
-                    <p class="frame-name">Shimmer Pink</p>
-                </div>
-
-                <div class="frame-card" onclick="selectFrame('og-black', this)">
-                    <img src="/assets/ogblack.png" alt="OG Black" class="frame-preview og-black">
-                    <p class="frame-name">OG Black</p>
-                </div>
-            </div>
-            <div class="frame-cta">
-                <img src="/assets/mymelody1.png" alt="My Melody" class="sticker-left">
-                <h1 class="choose-text">Choose a frame!</h1>
-                <img src="/assets/mymelody2.png" alt="My Melody" class="sticker-right">
-            </div>
-        </div>
-    </div>
     </main>
+
+    <!-- Hidden canvas for capturing frames -->
+    <canvas id="captureCanvas"></canvas>
 
     <footer>
         <div class="footer-top">
@@ -98,15 +72,6 @@
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
-        }
-    </script>
-
-    <script>
-        function selectFrame(frameId, el) {
-            document.querySelectorAll('.frame-card').forEach(card => card.classList.remove('selected'));
-            el.classList.add('selected');
-            sessionStorage.setItem('selectedFrame', frameId);
-            window.location.href = `chooseSession.html?frame=${frameId}`;
         }
     </script>
 
