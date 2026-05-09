@@ -3,18 +3,17 @@
 ═══════════════════════════════════════════════════ */
 const MAX_PHOTOS    = 4;
 let photos          = [];        // { original: dataURL, filtered: dataURL }[]
-let activeFilter    = 'none';
 let activeSlotIndex = 0;         // which slot is currently previewed
 
-/* CSS filter strings keyed by button label */
-const FILTERS = {
-    'none':                                         'none',
-    'grayscale(100%)':                              'grayscale(100%)',
-    'sepia(60%) contrast(110%) brightness(88%)':    'sepia(60%) contrast(110%) brightness(88%)',
-    'brightness(112%) blur(0.4px) saturate(75%)':   'brightness(112%) saturate(75%)',
-    'hue-rotate(28deg) saturate(125%) brightness(106%)': 'hue-rotate(28deg) saturate(125%) brightness(106%)',
-    'sepia(35%) saturate(145%) brightness(106%)':   'sepia(35%) saturate(145%) brightness(106%)',
-};
+// /* CSS filter strings keyed by button label */
+// const FILTERS = {
+//     'none':                                         'none',
+//     'grayscale(100%)':                              'grayscale(100%)',
+//     'sepia(60%) contrast(110%) brightness(88%)':    'sepia(60%) contrast(110%) brightness(88%)',
+//     'brightness(112%) blur(0.4px) saturate(75%)':   'brightness(112%) saturate(75%)',
+//     'hue-rotate(28deg) saturate(125%) brightness(106%)': 'hue-rotate(28deg) saturate(125%) brightness(106%)',
+//     'sepia(35%) saturate(145%) brightness(106%)':   'sepia(35%) saturate(145%) brightness(106%)',
+// };
 
 /* ═══════════════════════════════════════════════════
    DOM REFS
@@ -181,10 +180,15 @@ function setActiveSlot(index) {
     activeSlotIndex = index;
 
     // Update preview image
-    dropZone.style.display  = 'none';
+    dropZone.style.display   = 'none';
     previewImg.style.display = 'block';
     previewImg.src           = photos[index].filtered;
     previewImg.style.filter  = 'none';   // filter already baked into src
+
+    // Sync filter buttons to THIS photo's saved filter
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === photos[index].filter);
+    });
 
     // Highlight strip slot
     document.querySelectorAll('.strip-slot').forEach((s, i) => {
@@ -237,59 +241,63 @@ function showEmptyState() {
     slotDotsEl.classList.remove('visible');
     prevNavBtn.classList.remove('visible');
     nextNavBtn.classList.remove('visible');
-}
 
+    // Reset filter buttons to Normal
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === 'none');
+    });
+}
 /* ═══════════════════════════════════════════════════
    FILTERS
 ═══════════════════════════════════════════════════ */
 document.getElementById('filtersRow').addEventListener('click', e => {
     const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
+    if (!btn || photos.length === 0) return;
 
-    // Update active button
+    const filterValue = btn.dataset.filter;
+    const photo       = photos[activeSlotIndex];
+
+    // No-op if this filter is already applied to this photo
+    if (photo.filter === filterValue) return;
+
+    // Update button highlight
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    activeFilter = btn.dataset.filter;
+    // Save this filter on this specific photo only
+    photo.filter = filterValue;
 
-    // Apply filter to all photos using canvas
-    applyFilterToAll();
+    // Bake the filter into a new dataURL for this photo only
+    applyFilterToPhoto(activeSlotIndex, filterValue, () => {
+        previewImg.src = photos[activeSlotIndex].filtered;
+
+        const stripImg = document.getElementById(`strip-img-${activeSlotIndex}`);
+        if (stripImg) stripImg.src = photos[activeSlotIndex].filtered;
+    });
 });
 
-function applyFilterToAll() {
-    if (photos.length === 0) return;
+/* ═══════════════════════════════════════════════════
+   APPLY FILTER TO ONE PHOTO via Canvas
+   Always renders from .original so filters never compound
+═══════════════════════════════════════════════════ */
+function applyFilterToPhoto(index, filterValue, callback) {
+    const photo = photos[index];
+    const image = new Image();
 
-    let processed = 0;
+    image.onload = () => {
+        canvas.width  = image.naturalWidth;
+        canvas.height = image.naturalHeight;
 
-    photos.forEach((photo, i) => {
-        const image = new Image();
-        image.onload = () => {
-            canvas.width  = image.naturalWidth;
-            canvas.height = image.naturalHeight;
+        ctx.filter = filterValue === 'none' ? 'none' : filterValue;
+        ctx.drawImage(image, 0, 0);
+        ctx.filter = 'none';   // always reset after draw
 
-            ctx.filter = activeFilter === 'none' ? 'none' : activeFilter;
-            ctx.drawImage(image, 0, 0);
+        photo.filtered = canvas.toDataURL('image/jpeg', 0.92);
+        if (callback) callback();
+    };
 
-            const filteredURL = canvas.toDataURL('image/jpeg', 0.92);
-            photos[i].filtered = filteredURL;
-
-            // Update strip thumbnail
-            const stripImg = document.getElementById(`strip-img-${i}`);
-            if (stripImg) stripImg.src = filteredURL;
-
-            // Update preview if this is the active slot
-            if (i === activeSlotIndex) {
-                previewImg.src = filteredURL;
-            }
-
-            processed++;
-            // Reset canvas filter after last image
-            if (processed === photos.length) {
-                ctx.filter = 'none';
-            }
-        };
-        image.src = photo.original;   // always apply to original
-    });
+    // Always start from the original — never from filtered
+    image.src = photo.original;
 }
 
 /* ═══════════════════════════════════════════════════

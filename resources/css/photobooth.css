@@ -72,8 +72,8 @@ main {
 }
 
 .panel-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 0.95rem;
+    font-family: 'Poppins', serif;
+    font-size: 700;
     color: var(--text-mid);
     letter-spacing: 0.03em;
 }
@@ -82,11 +82,11 @@ main {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.55rem;
-    font-weight: 600;
+    font-size: 200;
+    font-weight: 500;
     color: #2ecc71;
     background: rgba(46, 204, 113, 0.12);
-    padding: 4px 10px;
+    padding: 4px 15px;
     border-radius: 30px;
 }
 
@@ -186,7 +186,7 @@ main {
     justify-content: center;
     gap: 12px;
     color: rgba(255, 255, 255, 0.5);
-    font-size: 0.85rem;
+    font-size: 200;
 }
 
 .no-camera svg {
@@ -203,8 +203,8 @@ main {
     background: rgba(255, 255, 255, 0.12);
     color: #fff;
     cursor: pointer;
-    font-size: 0.78rem;
-    font-family: 'DM Sans', sans-serif;
+    font-size: 200;
+    font-family: 'Poppins', sans-serif;
     transition: background 0.18s;
 }
 
@@ -222,8 +222,8 @@ main {
 }
 
 .filters-label {
-    font-family: 'DM Serif Display', serif;
-    font-size: 0.85rem;
+    font-family: 'Poppins', serif;
+    font-size: 300;
     color: var(--text-mid);
 }
 
@@ -364,13 +364,13 @@ main {
 }
 
 .strip-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 0.88rem;
+    font-family: 'Poppins', serif;
+    font-size: 300;
     color: var(--text-mid);
 }
 
 .strip-count {
-    font-size: 0.72rem;
+    font-size: 250;
     color: var(--text-mid);
     opacity: 0.7;
 }
