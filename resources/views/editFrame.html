@@ -26,13 +26,77 @@
         </div>
     </nav>
 
-    <main>
-
-
+    <main class="editor-main">
+ 
+        <div class="editor-grid">
+ 
+            <!-- ── LEFT COLUMN: two stacked cards ── -->
+            <div class="left-col">
+ 
+                <!-- Card 1: Photo picker -->
+                <div class="ef-card photos-card">
+                    <p class="card-title">Frame &amp; Stickers</p>
+                    <p class="card-sub">Choose your photos</p>
+                    <div class="photo-thumbs" id="photoThumbs"></div>
+                    <p class="drag-hint">① Click or drag a photo<br>② Drop onto a frame slot</p>
+                </div>
+ 
+                <!-- Card 2: Overlay toggles -->
+                <div class="ef-card overlay-card">
+                    <p class="card-title">Overlay options</p>
+                    <label class="toggle-row">
+                        <input type="checkbox" id="toggleDate" onchange="updateDateTime()">
+                        <span class="toggle-track"><span class="toggle-knob"></span></span>
+                        <span class="toggle-lbl">Add Date</span>
+                    </label>
+                    <label class="toggle-row">
+                        <input type="checkbox" id="toggleTime" onchange="updateDateTime()">
+                        <span class="toggle-track"><span class="toggle-knob"></span></span>
+                        <span class="toggle-lbl">Add Time</span>
+                    </label>
+                </div>
+ 
+            </div>
+ 
+            <!-- ── CENTER: Frame canvas ── -->
+            <div class="frame-area">
+                <div class="frame-outer" id="frameOuter">
+                    <div class="frame-slots"   id="frameSlots"></div>
+                    <div class="stickers-layer" id="stickersLayer"></div>
+                    <div class="frame-footer"  id="frameFooter">
+                        <img src="/assets/footer.png" alt="PhotoBoothique"
+                             class="frame-logo" id="frameLogo">
+                        <span class="frame-datetime" id="frameDatetime"></span>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- ── RIGHT: Sticker panel ── -->
+            <div class="ef-card stickers-card">
+                <p class="card-title">Stickers</p>
+                <div class="stickers-scroll">
+                    <div class="stickers-grid" id="stickersGrid"></div>
+                </div>
+            </div>
+ 
+        </div>
+ 
+        <!-- ── Bottom controls ── -->
+        <div class="controls-bar">
+            <button class="ctrl-btn btn-back"    onclick="goBack()">← Back</button>
+            <button class="ctrl-btn btn-rotate"  id="rotateBtn"
+                    onclick="rotateSelected()" disabled>↻ Rotate</button>
+            <div class="scale-wrap">
+                <span class="scale-lbl">Scale</span>
+                <span class="scale-val" id="scaleVal">100%</span>
+                <input type="range" id="scaleSlider"
+                       min="50" max="300" value="100"
+                       oninput="onScaleChange(this.value)" disabled>
+            </div>
+            <button class="ctrl-btn btn-preview" onclick="goPreview()">See Preview →</button>
+        </div>
+ 
     </main>
-
-    <!-- Hidden canvas for capturing frames -->
-    <canvas id="captureCanvas"></canvas>
 
     <footer>
         <div class="footer-top">
@@ -74,6 +138,8 @@
             menu.classList.toggle('open');
         }
     </script>
+    
+    <script src="../js/editFrame.js"></script>
 
 </body>
 </html>
