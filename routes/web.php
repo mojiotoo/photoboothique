@@ -1,27 +1,51 @@
 <?php
-
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return file_get_contents(resource_path('views/home.html'));
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/login', function () {
+    return file_get_contents(resource_path('views/login.html'));
+})->name('login');
+
+Route::get('/register', function () {
+    return file_get_contents(resource_path('views/register.html'));
+})->name('register');
+
+Route::get('/choose-session', function () {
+    return file_get_contents(resource_path('views/chooseSession.html'));
+});
+
+Route::get('/choose-frame', function () {
+    return file_get_contents(resource_path('views/chooseframe.html'));
+});
+
+Route::get('/edit-frame', function () {
+    return file_get_contents(resource_path('views/editFrame.html'));
+});
+
+Route::get('/photobooth', function () {
+    return file_get_contents(resource_path('views/photobooth.html'));
+});
+
+Route::get('/upload-photo', function () {
+    return file_get_contents(resource_path('views/uploadphoto.html'));
+});
+
+Route::get('/gallery', function () {
+    return file_get_contents(resource_path('views/gallery.html'));
+});
+
+Route::get('/preview', function () {
+    return file_get_contents(resource_path('views/preview.html'));
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-require __DIR__.'/auth.php';

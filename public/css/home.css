@@ -1,0 +1,114 @@
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 40px 20px 40px;
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  border: 4px solid rgb(255, 255, 255);
+  border-radius: 24px;
+  padding: 60px 40px;
+  margin: 20px auto;
+  width: 90%;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  margin: 5px;
+  overflow: hidden;
+}
+
+.box-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex:1;
+  padding: 0 40px;
+  min-width: 400px;
+  max-width: 700px;
+  white-space: nowrap;
+}
+
+#title {
+  font-size:clamp(40px, 5vw, 80px);
+  font-weight: 200;
+  color: #2a0a2a;
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+#subtitle {
+  font-size: clamp(22px, 3vw, 45px);
+  font-style: italic;
+  font-weight: 100;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 32px;
+}
+
+.startsession-btn {
+  background: linear-gradient(135deg, #C28CFF, #FFABD1);
+  color: #ffffff;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 50px;
+  font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: normal;
+}
+
+.startsession-btn::after {
+  content: ' →';
+}
+
+.startsession-btn:hover {
+  background: linear-gradient(135deg, #9E49FF, #FF65AA);
+  transform: translateY(-2px);
+}
+
+
+.photostrip-left,
+.photostrip-right {
+  flex-shrink: 1;
+  width: 20%;  
+  min-width: 450px;
+  max-width: 1000px;
+  height: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .box {
+    flex-wrap: wrap;          /* ← key: photostrip sejajar lalu text di bawah */
+    flex-direction: row;
+    padding: 30px 20px;
+    gap: 16px;
+    min-height: unset;
+  }
+
+   .box-content {
+    padding: 0;
+    order: 2;         /* text di bawah */
+    width: 100%;
+    white-space: normal;
+    flex: unset;
+  }
+
+  .photostrip-left,
+  .photostrip-right {
+    width: 40%;               /* keduanya muat dalam 1 baris */
+    max-width: 140px;
+    min-width: unset;
+    order: 1;
+    transform: none;
+  }
+
+}
