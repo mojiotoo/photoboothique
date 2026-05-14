@@ -1,0 +1,220 @@
+/* ===== QR Code / Download Page ===== */
+
+.qr-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100vh - 140px);
+}
+
+.qr-container {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    padding: 3rem 4rem;
+    width: 95%;
+    min-height: calc(100vh - 140px);
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: stretch;
+}
+
+/* ---- Two halves, each exactly 50% ---- */
+.qr-left,
+.qr-right {
+    flex: 1 1 50%;
+    width: 50%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ----- LEFT: photo strip + badge ----- */
+.strip-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-strip {
+    max-height: 70vh;
+    max-width: 100%;
+    width: auto;
+    border-radius: 8px;
+    box-shadow: 0 12px 35px rgba(150, 80, 130, 0.25);
+}
+
+.strip-badge {
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 130px;
+    height: 130px;
+}
+
+.strip-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ----- RIGHT: text + QR + actions ----- */
+.qr-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 520px;
+}
+
+.qr-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    line-height: 1.15;
+}
+
+.qr-subtitle {
+    color: #555;
+    font-size: 1rem;
+    margin: 0 0 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+/* ----- QR box ----- */
+.qr-box {
+    background: rgba(255, 255, 255, 0.55);
+    border: 2px solid #e87bb5;
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-image {
+    width: 240px;
+    height: 240px;
+    display: block;
+}
+
+/* ----- Action buttons ----- */
+.qr-actions {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.download-strip-btn,
+.save-gallery-btn {
+    border: none;
+    border-radius: 30px;
+    padding: 0.9rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.download-strip-btn {
+    background: linear-gradient(135deg, #ffb3d1, #f48fb6);
+}
+
+.save-gallery-btn {
+    background: linear-gradient(135deg, #d3b3f0, #b89ae8);
+}
+
+.download-strip-btn:hover,
+.save-gallery-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(150, 80, 130, 0.3);
+}
+
+.download-strip-btn:active,
+.save-gallery-btn:active {
+    transform: translateY(0);
+}
+
+.qr-note {
+    color: #9b6fd4;
+    font-size: 0.9rem;
+    margin: 0.5rem 0 0;
+    width: 100%;
+    text-align: center;
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 900px) {
+    .qr-container {
+        flex-direction: column;
+        padding: 2.5rem 1.5rem;
+    }
+
+    .qr-left,
+    .qr-right {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .qr-left {
+        margin-bottom: 3rem;
+    }
+
+    .photo-strip {
+        max-height: 55vh;
+    }
+
+    .qr-title {
+        font-size: 2rem;
+    }
+
+    .strip-badge {
+        width: 90px;
+        height: 90px;
+        font-size: 1rem;
+        top: -18px;
+        right: -10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .qr-main {
+        padding: 20px;
+    }
+
+    .qr-image {
+        width: 190px;
+        height: 190px;
+    }
+
+    .qr-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .download-strip-btn,
+    .save-gallery-btn {
+        width: 100%;
+    }
+}

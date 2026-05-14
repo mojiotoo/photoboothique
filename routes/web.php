@@ -44,6 +44,10 @@ Route::get('/preview', function () {
     return file_get_contents(resource_path('views/preview.html'));
 });
 
+Route::get('/qrcode', function () {
+    return file_get_contents(resource_path('views/qrcode.html'));
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

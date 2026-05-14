@@ -10,18 +10,23 @@ main {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 2rem 4rem;
-    min-height: 70vh;
+    padding: 20px 40px;   /* ← pakai angka yang SAMA dgn navbar */
+    box-sizing: border-box;
+    min-height: calc(100vh - 140px);
 }
 
 .gallery-container {
     background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(8px);
     border-radius: 24px;
-    padding: 2rem 3rem;
-    width: 100%;
-    max-width: 1300px;
+    padding: 4rem 3rem;
+    width: 95%;
+    min-height: calc(100vh - 140px);
     position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 }
 
 .gallery-header {
@@ -39,7 +44,7 @@ main {
 }
 
 .gallery-title {
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     color: #000;
     font-family: 'Poppins', serif;
     font-weight: 500;
@@ -74,6 +79,7 @@ main {
     width: 100%;
     display: flex;
     align-items: center;
+    margin-top: auto;
 }
 
 .carousel-btn.left { left: 0; }
@@ -169,9 +175,10 @@ main {
 
 .gallery-actions {
     display: flex;
-    gap: 1rem;
+    gap: 2rem;
     margin-top: 1.5rem;
     justify-content: center;
+    margin-bottom: auto;
 }
 
 .download-btn {

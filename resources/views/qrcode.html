@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+<!-- halaman download & qr code -->
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Preview</title>
+    <title>Scan to Get Your Photos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/layout.css">
-    <link rel="stylesheet" href="/css/preview.css">
+    <link rel="stylesheet" href="/css/qrcode.css">
 </head>
 <body>
     <div class="background">
@@ -27,25 +28,35 @@
         </div>
     </nav>
 
-    <main class="preview-main">
-        <div class="preview-container">
+    <main class="qr-main">
+        <div class="qr-container">
 
-            <!-- LEFT HALF -->
-            <div class="preview-left">
+            <!-- LEFT HALF: photo strip + badge -->
+            <div class="qr-left">
                 <div class="strip-wrapper">
-                    <img src="/assets/mymelody2.png" alt="Your photo strip" class="photo-strip" id="photo-strip">
+                    <img src="/assets/photostrip-home2.png" alt="Your photo strip" class="photo-strip" id="photo-strip">
+                    <div class="strip-badge">
+                        <img src="/assets/strip.png" alt="Strip Ready">
+                    </div>
                 </div>
             </div>
 
-            <!-- RIGHT HALF -->
-            <div class="preview-right">
-                <div class="preview-content">
-                    <h1 class="preview-title">Photo Preview</h1>
-                    <p class="preview-subtitle">Recheck your photos before downloading &lt;3</p>
-                    <div class="preview-actions">
-                        <button class="reedit-btn" onclick="window.location.href='/edit-frame'">Re-edit Photo</button>
-                        <button class="download-btn" onclick="window.location.href='/qrcode'">Download Photo</button>
+            <!-- RIGHT HALF: text + QR + actions -->
+            <div class="qr-right">
+                <div class="qr-content">
+                    <h1 class="qr-title">Scan to get your photos</h1>
+                    <p class="qr-subtitle">Each QR code is unique to this session. It expires after download or 30 minutes.</p>
+
+                    <div class="qr-box">
+                        <img src="/assets/qr-code.png" alt="QR Code" class="qr-image" id="qr-image">
                     </div>
+
+                    <div class="qr-actions">
+                        <button class="download-strip-btn" onclick="downloadStrip()">Download Strip (.jpg)</button>
+                        <button class="save-gallery-btn" onclick="saveToGallery()">Save to my Gallery</button>
+                    </div>
+
+                    <p class="qr-note">images purged from server after download!</p>
                 </div>
             </div>
 
@@ -87,5 +98,21 @@
             const menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
         }
+
+        function downloadStrip() {
+            const strip = document.getElementById('photo-strip');
+            const link = document.createElement('a');
+            link.href = strip.src;
+            link.download = 'photoboothique-strip.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function saveToGallery() {
+            alert('Saved to your gallery!');
+            // window.location.href = '/gallery';
+        }
+    </script>
 </body>
 </html>

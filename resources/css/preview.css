@@ -1,0 +1,167 @@
+/* ===== Photo Preview Page ===== */
+
+.preview-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100vh - 140px);
+}
+
+.preview-container {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    padding: 3rem 4rem;
+    width: 95%;
+    min-height: calc(100vh - 140px);
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: stretch;
+}
+
+/* ---- Two halves, each exactly 50% ---- */
+.preview-left,
+.preview-right {
+    flex: 1 1 50%;
+    width: 50%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ----- LEFT: photo strip ----- */
+.strip-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-strip {
+    max-height: 70vh;
+    max-width: 100%;
+    width: auto;
+    border-radius: 8px;
+    box-shadow: 0 12px 35px rgba(150, 80, 130, 0.25);
+}
+
+/* ----- RIGHT: text + actions ----- */
+.preview-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.preview-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.preview-subtitle {
+    color: #555;
+    font-size: 1.05rem;
+    margin: 0.25rem 0 2rem;
+    width: 100%;
+    text-align: center;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.reedit-btn,
+.download-btn {
+    border: none;
+    border-radius: 30px;
+    padding: 0.9rem 2.2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.reedit-btn {
+    background: linear-gradient(135deg, #ffb3d1, #f48fb6);
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #d3b3f0, #b89ae8);
+}
+
+.reedit-btn:hover,
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(150, 80, 130, 0.3);
+}
+
+.reedit-btn:active,
+.download-btn:active {
+    transform: translateY(0);
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 900px) {
+    .preview-container {
+        flex-direction: column;
+        padding: 2.5rem 1.5rem;
+    }
+
+    .preview-left,
+    .preview-right {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .preview-left {
+        margin-bottom: 2.5rem;
+    }
+
+    .photo-strip {
+        max-height: 55vh;
+    }
+
+    .preview-title {
+        font-size: 2.2rem;
+    }
+
+    .preview-subtitle {
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .preview-main {
+        padding: 20px;
+    }
+
+    .preview-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .reedit-btn,
+    .download-btn {
+        width: 100%;
+    }
+}
