@@ -26,22 +26,24 @@
         </div>
     </nav>
 
-    <main class="editor-main">
+<main class="editor-main">
  
         <div class="editor-grid">
  
-            <!-- ── LEFT COLUMN: two stacked cards ── -->
-            <div class="left-col">
+            <!-- ── LEFT COLUMN: scrollable photos + pinned overlay ── -->
+            <div class="left-wrapper">
  
-                <!-- Card 1: Photo picker -->
-                <div class="ef-card photos-card">
-                    <p class="card-title">Frame &amp; Stickers</p>
-                    <p class="card-sub">Choose your photos</p>
-                    <div class="photo-thumbs" id="photoThumbs"></div>
-                    <p class="drag-hint">① Click or drag a photo<br>② Drop onto a frame slot</p>
+                <!-- Scrollable photos card -->
+                <div class="left-col">
+                    <div class="ef-card photos-card">
+                        <p class="card-title">Frame &amp; Stickers</p>
+                        <p class="card-sub">Choose your photos</p>
+                        <div class="photo-thumbs" id="photoThumbs"></div>
+                        <p class="drag-hint">① Click or drag a photo<br>② Drop onto a frame slot</p>
+                    </div>
                 </div>
  
-                <!-- Card 2: Overlay toggles -->
+                <!-- Pinned overlay card — always visible, never scrolls away -->
                 <div class="ef-card overlay-card">
                     <p class="card-title">Overlay options</p>
                     <label class="toggle-row">

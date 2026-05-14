@@ -5,7 +5,7 @@
 ═══════════════════════════════════════════════════════════ */
 const STICKER_SRCS = [
     // Row 1
-    '/assets/stickers/1.png',
+    '../assets/stickers/1.png',
     '/assets/stickers/2.png',
     '/assets/stickers/3.png',
     // Row 2
@@ -57,7 +57,7 @@ const FRAME_CONFIGS = {
      * pad     → pixels from edge to the first photo slot — tune to match your PNG's holes
      * gap     → pixels between photo slots — tune to match your PNG's dividers
      */
-    'classic-baby-pink': { pngSrc: '/assets/frames/classicbabypink.png', bgColor: '#fff',    layout: 'strip-4',  frameW: 280, frameH: 500, footerH: 50, gap: 4,  pad: 6  },
+    'classic-baby-pink': { pngSrc: '/assets/frames/classicbabypink.png', bgColor: '#fce8f0', layout: 'grid-2x2', frameW: 300, frameH: 393, footerH: 22, gap: 4,  pad: 7  },
     'everyday-white':    { pngSrc: '/assets/frames/everydaywhite.png',   bgColor: '#fff',    layout: 'strip-4',  frameW: 280, frameH: 500, footerH: 50, gap: 4,  pad: 6  },
     'shimmer-pink':      { pngSrc: '/assets/frames/shimmer-pink.png',    bgColor: '#f0d4fa', layout: 'instax',   frameW: 280, frameH: 380, footerH: 50, gap: 0,  pad: 10 },
     'og-black':          { pngSrc: '/assets/frames/ogblack.png',         bgColor: '#111',    layout: 'grid-2x2', frameW: 360, frameH: 400, footerH: 48, gap: 5,  pad: 8  },
@@ -226,18 +226,19 @@ function buildFrame() {
     footer.style.width    = '100%';
     footer.style.zIndex   = '6';  // above PNG overlay
 
-    // ── PNG frame overlay ──────────────────────────────────────
-    // Sits above photos (z:1) but below stickers (z:10) and footer text (z:6)
+    // ── PNG frame background ───────────────────────────────────
+    // The PNG has solid black photo-slot areas. It goes BENEATH the slots
+    // (z-index 0) so placed photos visually cover those black squares.
     const framePng       = document.createElement('img');
     framePng.src         = cfg.pngSrc;
     framePng.alt         = '';
     framePng.className   = 'frame-png-overlay';
     framePng.draggable   = false;
     framePng.onerror     = () => console.warn(`Frame PNG not found: ${cfg.pngSrc}`);
-    // Insert between frameSlots and stickersLayer
-    frameOuter.insertBefore(framePng, stickersLayer);
+    // Insert BEFORE frameSlots so it sits underneath everything
+    frameOuter.insertBefore(framePng, frameSlots);
 
-    // Stickers above PNG
+    // Stickers above everything
     stickersLayer.style.zIndex = '10';
 
     // Click outside stickers to deselect
@@ -703,7 +704,7 @@ async function goPreview() {
         const dataURL = await exportFrame();
         sessionStorage.setItem('previewImage', dataURL);
         sessionStorage.setItem('previewFrame', st.frameType);
-        window.location.href = '/preview';
+        window.location.href = 'preview.html';
     } catch(err) {
         console.error('Export failed:', err);
         alert('Could not generate preview. Please try again.');

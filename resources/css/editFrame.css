@@ -256,7 +256,8 @@ footer { display: none !important; }
 .frame-slots {
     display: grid;
     width: 100%;
-    position: relative;
+    position: absolute;
+    z-index: 1;  /* above PNG background (0) */
 }
 
 /* Individual photo slot */
@@ -324,14 +325,34 @@ footer { display: none !important; }
     will-change: transform;
 }
 
+/* ── PNG frame background ─────────────────────────────────────
+   The PNG is placed UNDER the photo slots (z-index: 0).
+   Photos (z-index: 1) render on top of the PNG's black slot areas.
+   Stickers (z-index: 10) sit above everything.
+─────────────────────────────────────────────────────────────── */
+.frame-png-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;       /* stretch to fill frame dimensions exactly */
+    pointer-events: none;
+    z-index: 0;             /* BACKGROUND — beneath photo slots */
+    display: block;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
 /* ── Frame footer (logo + date-time) ── */
 .frame-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 10px;
-    flex-shrink: 0;
-    position: relative;
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    z-index: 6;  /* above PNG (0) and slots (1), below stickers (10) */
 }
 
 .frame-logo {
