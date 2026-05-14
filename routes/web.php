@@ -3,6 +3,16 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\PhotoStripController;
+
+Route::middleware('auth')->group(function () {
+    Route::post('/strip/save', [PhotoStripController::class, 'store'])->name('strip.store');
+    Route::get('/gallery', [PhotoStripController::class, 'gallery'])->name('gallery');
+    Route::delete('/strip/{id}', [PhotoStripController::class, 'destroy'])->name('strip.destroy');
+});
+
+Route::get('/qr/{token}', [PhotoStripController::class, 'qrCode'])->name('strip.qr');
+Route::get('/download/{token}', [PhotoStripController::class, 'download'])->name('strip.download');
 
 Route::get('/', function () {
     return file_get_contents(resource_path('views/home.html'));
@@ -34,10 +44,6 @@ Route::get('/photobooth', function () {
 
 Route::get('/upload-photo', function () {
     return file_get_contents(resource_path('views/uploadphoto.html'));
-});
-
-Route::get('/gallery', function () {
-    return file_get_contents(resource_path('views/gallery.html'));
 });
 
 Route::get('/preview', function () {
