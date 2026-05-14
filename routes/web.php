@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\PhotoStripController;
 
 Route::middleware('auth')->group(function () {
+    Route::get('/preview', fn() => view('photoPreview'))->name('preview');
+    Route::get('/qrcode', fn() => view('qrcode'))->name('qrcode');
     Route::post('/strip/save', [PhotoStripController::class, 'store'])->name('strip.store');
     Route::get('/gallery', [PhotoStripController::class, 'gallery'])->name('gallery');
     Route::delete('/strip/{id}', [PhotoStripController::class, 'destroy'])->name('strip.destroy');

@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/gallery.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <div class="background">
@@ -23,7 +24,7 @@
         </ul>
         <div class="nav-right">
             <button class="login-btn" onclick="window.location.href='/login'">Login</button>
-            <button class="hamburger" onclick="toggleMenu()">☰</button>
+            <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
         </div>
     </nav>
 
@@ -34,18 +35,27 @@
                 <div class="gallery-title-group">
                     <h1 class="gallery-title">My Gallery</h1>
                 </div>
-                <p class="gallery-subtitle" id="photo-count">0 photo strips saved</p>
+                <p class="gallery-subtitle" id="photo-count">{{ count($strips) }} photo strip{{ count($strips) !== 1 ? 's' : '' }} saved</p>
                 <button class="select-all-btn" onclick="toggleSelectAll()">Select All</button>
             </div>
 
             <div class="gallery-carousel">
                 <button class="carousel-btn left" onclick="scrollGallery(-1)">&#8249;</button>
                 <div class="gallery-grid" id="gallery-grid">
-                    <div class="empty-state" id="empty-state">
-                        <p>✨ No photo strips yet!</p>
-                        <p>Start a session to create your first one.</p>
-                        <button class="start-btn" onclick="window.location.href='/choose-frame'">Start your session!</button>
-                    </div>
+
+                    @forelse ($strips as $strip)
+                        <div class="gallery-card" data-id="{{ $strip->id }}" onclick="toggleCard(this)">
+                            <img src="{{ $strip->image_url }}" alt="Photo strip">
+                            <div class="checkmark">&#10003;</div>
+                        </div>
+                    @empty
+                        <div class="empty-state" id="empty-state">
+                            <p>&#10024; No photo strips yet!</p>
+                            <p>Start a session to create your first one.</p>
+                            <button class="start-btn" onclick="window.location.href='/choose-frame'">Start your session!</button>
+                        </div>
+                    @endforelse
+
                 </div>
                 <button class="carousel-btn right" onclick="scrollGallery(1)">&#8250;</button>
             </div>
@@ -96,13 +106,17 @@
             <img src="/assets/stars-footer.png" alt="stars" class="stars-footer">
         </div>
         <hr class="footer-divider">
-        <p class="footer-copy">© 2026 PhotoBoothique. All rights reserved.</p>
+        <p class="footer-copy">&copy; 2026 PhotoBoothique. All rights reserved.</p>
     </footer>
 
     <script>
         function toggleMenu() {
-            const menu = document.getElementById('nav-menu');
-            menu.classList.toggle('open');
+            document.getElementById('nav-menu').classList.toggle('open');
+        }
+
+        // ── Select / deselect a card ────────────────────────────
+        function toggleCard(card) {
+            card.classList.toggle('selected');
         }
 
         function toggleSelectAll() {
@@ -113,10 +127,27 @@
         }
 
         function scrollGallery(dir) {
-            const grid = document.getElementById('gallery-grid');
-            grid.scrollBy({ left: dir * 300, behavior: 'smooth' });
+            document.getElementById('gallery-grid').scrollBy({ left: dir * 300, behavior: 'smooth' });
         }
 
+        // ── Download every selected strip ───────────────────────
+        function downloadSelected() {
+            const selected = document.querySelectorAll('.gallery-card.selected');
+            if (selected.length === 0) return alert('Please select at least one photo strip.');
+
+            selected.forEach(card => {
+                const url = card.querySelector('img').src;
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'photoboothique-strip.jpg';
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        // ── Delete modal ────────────────────────────────────────
         function showDeleteModal() {
             const selected = document.querySelectorAll('.gallery-card.selected');
             if (selected.length === 0) return alert('Please select at least one photo strip.');
@@ -127,22 +158,44 @@
             document.getElementById('modal-overlay').style.display = 'none';
         }
 
-        function confirmDelete() {
-            document.querySelectorAll('.gallery-card.selected').forEach(c => c.remove());
+        // ── Actually delete: hit the Laravel route for each ─────
+        async function confirmDelete() {
+            const selected = document.querySelectorAll('.gallery-card.selected');
+            const token = document.querySelector('meta[name="csrf-token"]').content;
+
+            for (const card of selected) {
+                const id = card.dataset.id;
+                try {
+                    const res = await fetch('/strip/' + id, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRF-TOKEN': token },
+                    });
+                    if (res.ok) {
+                        card.remove();
+                    }
+                } catch (err) {
+                    console.error('Delete failed for strip ' + id, err);
+                }
+            }
+
             updateCount();
             hideDeleteModal();
         }
 
-        function downloadSelected() {
-            const selected = document.querySelectorAll('.gallery-card.selected');
-            if (selected.length === 0) return alert('Please select at least one photo strip.');
-            alert(`Downloading ${selected.length} photo strip(s)...`);
-        }
-
         function updateCount() {
             const count = document.querySelectorAll('.gallery-card').length;
-            document.getElementById('photo-count').textContent = `${count} photo strip${count !== 1 ? 's' : ''} saved`;
-            document.getElementById('empty-state').style.display = count === 0 ? 'flex' : 'none';
+            document.getElementById('photo-count').textContent =
+                count + ' photo strip' + (count !== 1 ? 's' : '') + ' saved';
+
+            const grid = document.getElementById('gallery-grid');
+            if (count === 0 && !document.getElementById('empty-state')) {
+                grid.innerHTML =
+                    '<div class="empty-state" id="empty-state">' +
+                    '<p>&#10024; No photo strips yet!</p>' +
+                    '<p>Start a session to create your first one.</p>' +
+                    '<button class="start-btn" onclick="window.location.href=\'/choose-frame\'">Start your session!</button>' +
+                    '</div>';
+            }
         }
     </script>
 </body>

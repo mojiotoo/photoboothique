@@ -703,7 +703,7 @@ async function goPreview() {
         const dataURL = await exportFrame();
         sessionStorage.setItem('previewImage', dataURL);
         sessionStorage.setItem('previewFrame', st.frameType);
-        window.location.href = 'preview.html';
+        window.location.href = '/preview';
     } catch(err) {
         console.error('Export failed:', err);
         alert('Could not generate preview. Please try again.');

@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/preview.css">
+    <!-- CSRF token so the upload POST is accepted by Laravel -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <div class="background">
@@ -33,7 +35,7 @@
             <!-- LEFT HALF -->
             <div class="preview-left">
                 <div class="strip-wrapper">
-                    <img src="/assets/mymelody2.png" alt="Your photo strip" class="photo-strip" id="photo-strip">
+                    <img src="" alt="Your photo strip" class="photo-strip" id="photo-strip">
                 </div>
             </div>
 
@@ -43,8 +45,8 @@
                     <h1 class="preview-title">Photo Preview</h1>
                     <p class="preview-subtitle">Recheck your photos before downloading &lt;3</p>
                     <div class="preview-actions">
-                        <button class="reedit-btn" onclick="window.location.href='/edit-frame'">Re-edit Photo</button>
-                        <button class="download-btn" onclick="window.location.href='/qrcode'">Download Photo</button>
+                        <button class="reedit-btn" onclick="goReedit()">Re-edit Photo</button>
+                        <button class="download-btn" id="downloadBtn" onclick="uploadAndContinue()">Download Photo</button>
                     </div>
                 </div>
             </div>
@@ -84,8 +86,77 @@
 
     <script>
         function toggleMenu() {
-            const menu = document.getElementById('nav-menu');
-            menu.classList.toggle('open');
+            document.getElementById('nav-menu').classList.toggle('open');
         }
+
+        // ── Load the strip that editFrame.js saved ──────────────
+        const stripDataURL = sessionStorage.getItem('previewImage');
+        const stripFrame   = sessionStorage.getItem('previewFrame') || '';
+
+        if (!stripDataURL) {
+            // No strip in memory — send them back to start
+            alert('No photo strip found. Please create one first.');
+            window.location.href = '/photobooth';
+        } else {
+            document.getElementById('photo-strip').src = stripDataURL;
+        }
+
+        // ── Re-edit: go back to the editor with the same frame ──
+        function goReedit() {
+            window.location.href = '/edit-frame' + (stripFrame ? ('?frame=' + stripFrame) : '');
+        }
+
+        // ── Convert a dataURL to a Blob (for file upload) ───────
+        function dataURLtoBlob(dataURL) {
+            const [header, base64] = dataURL.split(',');
+            const mime = header.match(/:(.*?);/)[1];
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new Blob([bytes], { type: mime });
+        }
+
+        // ── Upload to Cloudinary via Laravel, then go to QR ─────
+        async function uploadAndContinue() {
+            const btn = document.getElementById('downloadBtn');
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            try {
+                const blob = dataURLtoBlob(stripDataURL);
+
+                const formData = new FormData();
+                formData.append('strip_image', blob, 'strip.jpg');
+
+                const token = document.querySelector('meta[name="csrf-token"]').content;
+
+                const response = await fetch('/strip/save', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': token },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed: ' + response.status);
+                }
+
+                const data = await response.json();
+
+                // hand the QR url + image url to the QR page
+                sessionStorage.setItem('qrUrl', data.qr_url);
+                sessionStorage.setItem('stripImageUrl', data.image_url);
+
+                window.location.href = '/qrcode';
+
+            } catch (err) {
+                console.error(err);
+                alert('Could not upload your photo strip. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'Download Photo';
+            }
+        }
+    </script>
 </body>
 </html>

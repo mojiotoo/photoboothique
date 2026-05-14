@@ -1,5 +1,4 @@
-<!-- halaman download & qr code -->
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/qrcode.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <div class="background">
@@ -34,7 +34,7 @@
             <!-- LEFT HALF: photo strip + badge -->
             <div class="qr-left">
                 <div class="strip-wrapper">
-                    <img src="/assets/photostrip-home2.png" alt="Your photo strip" class="photo-strip" id="photo-strip">
+                    <img src="" alt="Your photo strip" class="photo-strip" id="photo-strip">
                     <div class="strip-badge">
                         <img src="/assets/strip.png" alt="Strip Ready">
                     </div>
@@ -48,7 +48,7 @@
                     <p class="qr-subtitle">Each QR code is unique to this session. It expires after download or 30 minutes.</p>
 
                     <div class="qr-box">
-                        <img src="/assets/qr-code.png" alt="QR Code" class="qr-image" id="qr-image">
+                        <img src="" alt="QR Code" class="qr-image" id="qr-image">
                     </div>
 
                     <div class="qr-actions">
@@ -95,23 +95,37 @@
 
     <script>
         function toggleMenu() {
-            const menu = document.getElementById('nav-menu');
-            menu.classList.toggle('open');
+            document.getElementById('nav-menu').classList.toggle('open');
         }
 
+        // ── Pull the values preview.html stored ─────────────────
+        const qrUrl         = sessionStorage.getItem('qrUrl');
+        const stripImageUrl = sessionStorage.getItem('stripImageUrl');
+
+        if (!qrUrl || !stripImageUrl) {
+            alert('No photo strip found. Please create one first.');
+            window.location.href = '/photobooth';
+        } else {
+            // QR code image comes straight from the Laravel /qr/{token} route
+            document.getElementById('qr-image').src = qrUrl;
+            // show the uploaded strip
+            document.getElementById('photo-strip').src = stripImageUrl;
+        }
+
+        // ── Download the strip directly to this device ──────────
         function downloadStrip() {
-            const strip = document.getElementById('photo-strip');
             const link = document.createElement('a');
-            link.href = strip.src;
+            link.href = stripImageUrl;
             link.download = 'photoboothique-strip.jpg';
+            link.target = '_blank';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
+        // ── Save to gallery (already saved on upload; just go) ──
         function saveToGallery() {
-            alert('Saved to your gallery!');
-            // window.location.href = '/gallery';
+            window.location.href = '/gallery';
         }
     </script>
 </body>
