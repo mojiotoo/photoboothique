@@ -5,45 +5,45 @@
 ═══════════════════════════════════════════════════════════ */
 const STICKER_SRCS = [
     // Row 1
-    '/images/stickers/sticker-01.png',
-    '/images/stickers/sticker-02.png',
-    '/images/stickers/sticker-03.png',
+    '/assets/stickers/1.png',
+    '/assets/stickers/2.png',
+    '/assets/stickers/3.png',
     // Row 2
-    '/images/stickers/sticker-04.png',
-    '/images/stickers/sticker-05.png',
-    '/images/stickers/sticker-06.png',
+    '/assets/stickers/4.png',
+    '/assets/stickers/5.png',
+    '/assets/stickers/6.png',
     // Row 3
-    '/images/stickers/sticker-07.png',
-    '/images/stickers/sticker-08.png',
-    '/images/stickers/sticker-09.png',
+    '/assets/stickers/7.png',
+    '/assets/stickers/8.png',
+    '/assets/stickers/9.png',
     // Row 4
-    '/images/stickers/sticker-10.png',
-    '/images/stickers/sticker-11.png',
-    '/images/stickers/sticker-12.png',
+    '/assets/stickers/10.png',
+    '/assets/stickers/11.png',
+    '/assets/stickers/12.png',
     // Row 5
-    '/images/stickers/sticker-13.png',
-    '/images/stickers/sticker-14.png',
-    '/images/stickers/sticker-15.png',
+    '/assets/stickers/13.png',
+    '/assets/stickers/14.png',
+    '/assets/stickers/15.png',
     // Row 6
-    '/images/stickers/sticker-16.png',
-    '/images/stickers/sticker-17.png',
-    '/images/stickers/sticker-18.png',
+    '/assets/stickers/16.png',
+    '/assets/stickers/17.png',
+    '/assets/stickers/18.png',
     // Row 7
-    '/images/stickers/sticker-19.png',
-    '/images/stickers/sticker-20.png',
-    '/images/stickers/sticker-21.png',
+    '/assets/stickers/19.png',
+    '/assets/stickers/20.png',
+    '/assets/stickers/21.png',
     // Row 8
-    '/images/stickers/sticker-22.png',
-    '/images/stickers/sticker-23.png',
-    '/images/stickers/sticker-24.png',
+    '/assets/stickers/22.png',
+    '/assets/stickers/23.png',
+    '/assets/stickers/24.png',
     // Row 9
-    '/images/stickers/sticker-25.png',
-    '/images/stickers/sticker-26.png',
-    '/images/stickers/sticker-27.png',
+    '/assets/stickers/25.png',
+    '/assets/stickers/26.png',
+    '/assets/stickers/27.png',
     // Row 10
-    '/images/stickers/sticker-28.png',
-    '/images/stickers/sticker-29.png',
-    '/images/stickers/sticker-30.png',
+    '/assets/stickers/28.png',
+    '/assets/stickers/29.png',
+    '/assets/stickers/30.png',
 ];
 
 /* ═══════════════════════════════════════════════════════════
