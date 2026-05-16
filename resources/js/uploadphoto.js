@@ -2,37 +2,28 @@
    STATE
 ═══════════════════════════════════════════════════ */
 const MAX_PHOTOS    = 4;
-let photos          = [];        // { original: dataURL, filtered: dataURL }[]
-let activeSlotIndex = 0;         // which slot is currently previewed
-
-// /* CSS filter strings keyed by button label */
-// const FILTERS = {
-//     'none':                                         'none',
-//     'grayscale(100%)':                              'grayscale(100%)',
-//     'sepia(60%) contrast(110%) brightness(88%)':    'sepia(60%) contrast(110%) brightness(88%)',
-//     'brightness(112%) blur(0.4px) saturate(75%)':   'brightness(112%) saturate(75%)',
-//     'hue-rotate(28deg) saturate(125%) brightness(106%)': 'hue-rotate(28deg) saturate(125%) brightness(106%)',
-//     'sepia(35%) saturate(145%) brightness(106%)':   'sepia(35%) saturate(145%) brightness(106%)',
-// };
+let photos          = [];        // { original: dataURL, filtered: dataURL, filter: string }[]
+let activeSlotIndex = 0;
 
 /* ═══════════════════════════════════════════════════
    DOM REFS
 ═══════════════════════════════════════════════════ */
-const previewImg     = document.getElementById('previewImg');
-const dropZone       = document.getElementById('dropZone');
-const fileInput      = document.getElementById('fileInput');
-const canvas         = document.getElementById('captureCanvas');
-const ctx            = canvas.getContext('2d');
-const stripCountEl   = document.getElementById('stripCount');
-const counterBadge   = document.getElementById('counterBadge');
-const nextBtn        = document.getElementById('nextBtn');
-const addPhotoBtn    = document.getElementById('addPhotoBtn');
-const prevNavBtn     = document.getElementById('prevNav');
-const nextNavBtn     = document.getElementById('nextNav');
-const slotDotsEl     = document.getElementById('slotDots');
+const previewImg   = document.getElementById('previewImg');
+const dropZone     = document.getElementById('dropZone');
+const fileInput    = document.getElementById('fileInput');
+const canvas       = document.getElementById('captureCanvas');
+const ctx          = canvas.getContext('2d');
+const stripCountEl = document.getElementById('stripCount');
+const counterBadge = document.getElementById('counterBadge');
+const nextBtn      = document.getElementById('nextBtn');
+const addPhotoBtn  = document.getElementById('addPhotoBtn');
+const prevNavBtn   = document.getElementById('prevNav');
+const nextNavBtn   = document.getElementById('nextNav');
+const slotDotsEl   = document.getElementById('slotDots');
+const filtersRow   = document.getElementById('filtersRow');
 
 /* ═══════════════════════════════════════════════════
-   FILE INPUT — open picker
+   FILE INPUT
 ═══════════════════════════════════════════════════ */
 function openFilePicker() {
     if (photos.length >= MAX_PHOTOS) return;
@@ -40,9 +31,8 @@ function openFilePicker() {
 }
 
 fileInput.addEventListener('change', e => {
-    const files = Array.from(e.target.files);
-    handleFiles(files);
-    fileInput.value = '';   // reset so same file can be re-picked
+    handleFiles(Array.from(e.target.files));
+    fileInput.value = '';
 });
 
 /* ═══════════════════════════════════════════════════
@@ -52,28 +42,21 @@ dropZone.addEventListener('dragover', e => {
     e.preventDefault();
     dropZone.classList.add('drag-over');
 });
-
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-});
-
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     handleFiles(files);
 });
-
 dropZone.addEventListener('click', openFilePicker);
 
 /* ═══════════════════════════════════════════════════
-   HANDLE UPLOADED FILES
+   HANDLE FILES
 ═══════════════════════════════════════════════════ */
 function handleFiles(files) {
-    const available = MAX_PHOTOS - photos.length;
-    const toLoad    = files.slice(0, available);
-
-    toLoad.forEach(file => {
+    const slots = MAX_PHOTOS - photos.length;
+    files.slice(0, slots).forEach(file => {
         const reader = new FileReader();
         reader.onload = e => addPhoto(e.target.result);
         reader.readAsDataURL(file);
@@ -81,37 +64,43 @@ function handleFiles(files) {
 }
 
 /* ═══════════════════════════════════════════════════
-   ADD PHOTO TO STATE + STRIP
+   ADD PHOTO
 ═══════════════════════════════════════════════════ */
 function addPhoto(dataURL) {
     const index = photos.length;
-    photos.push({ original: dataURL, filtered: dataURL });
+    photos.push({ original: dataURL, filtered: dataURL, filter: 'none' });
+    renderSlot(index);
+    setActiveSlot(index);
+    updateUI();
+}
 
-    // Render into the strip slot
-    const slot = document.querySelector(`.strip-slot[data-index="${index}"]`);
+/* ═══════════════════════════════════════════════════
+   RENDER STRIP SLOT
+═══════════════════════════════════════════════════ */
+function renderSlot(index) {
+    const photo = photos[index];
+    const slot  = document.querySelector(`.strip-slot[data-index="${index}"]`);
     if (!slot) return;
 
-    slot.innerHTML = '';
+    const fresh = slot.cloneNode(false);
+    slot.parentNode.replaceChild(fresh, slot);
+
+    fresh.innerHTML = '';
+    fresh.classList.add('filled', 'pop-in');
+    setTimeout(() => fresh.classList.remove('pop-in'), 400);
 
     const img = document.createElement('img');
-    img.src = dataURL;
-    img.id  = `strip-img-${index}`;
-    slot.appendChild(img);
+    img.src   = photo.filtered;
+    img.id    = `strip-img-${index}`;
+    fresh.appendChild(img);
 
-    const removeBtn = document.createElement('div');
+    const removeBtn       = document.createElement('div');
     removeBtn.className   = 'remove-btn';
     removeBtn.textContent = '✕ Remove';
     removeBtn.addEventListener('click', e => { e.stopPropagation(); removePhoto(index); });
-    slot.appendChild(removeBtn);
+    fresh.appendChild(removeBtn);
 
-    slot.classList.add('filled', 'pop-in');
-    setTimeout(() => slot.classList.remove('pop-in'), 400);
-
-    slot.addEventListener('click', () => setActiveSlot(index));
-
-    // Show this photo in preview
-    setActiveSlot(index);
-    updateUI();
+    fresh.addEventListener('click', () => setActiveSlot(index));
 }
 
 /* ═══════════════════════════════════════════════════
@@ -119,121 +108,76 @@ function addPhoto(dataURL) {
 ═══════════════════════════════════════════════════ */
 function removePhoto(index) {
     photos.splice(index, 1);
-
-    // Rebuild all slots
-    rebuildStrip();
+    rebuildAllSlots();
     updateUI();
 
-    // Show adjacent slot or empty state
-    const newActive = Math.min(activeSlotIndex, photos.length - 1);
-    if (photos.length > 0) {
-        setActiveSlot(newActive);
-    } else {
+    if (photos.length === 0) {
         showEmptyState();
+    } else {
+        setActiveSlot(Math.min(activeSlotIndex, photos.length - 1));
     }
 }
 
-/* ═══════════════════════════════════════════════════
-   REBUILD STRIP after removal
-═══════════════════════════════════════════════════ */
-function rebuildStrip() {
-    for (let i = 0; i < MAX_PHOTOS; i++) {
-        const slot = document.querySelector(`.strip-slot[data-index="${i}"]`);
-        slot.innerHTML = '';
-        slot.className = 'strip-slot';
-        slot.replaceWith(slot.cloneNode(false));  // remove old listeners
-    }
+function rebuildAllSlots() {
+    photos.forEach((_, i) => renderSlot(i));
 
-    // Re-query and re-attach
-    photos.forEach((p, i) => {
-        const slot = document.querySelector(`.strip-slot[data-index="${i}"]`);
-        slot.innerHTML = '';
-
-        const img = document.createElement('img');
-        img.src = p.filtered;
-        img.id  = `strip-img-${i}`;
-        slot.appendChild(img);
-
-        const removeBtn = document.createElement('div');
-        removeBtn.className   = 'remove-btn';
-        removeBtn.textContent = '✕ Remove';
-        removeBtn.addEventListener('click', e => { e.stopPropagation(); removePhoto(i); });
-        slot.appendChild(removeBtn);
-
-        slot.classList.add('filled');
-        slot.addEventListener('click', () => setActiveSlot(i));
-    });
-
-    // Empty slots
     for (let i = photos.length; i < MAX_PHOTOS; i++) {
-        const slot = document.querySelector(`.strip-slot[data-index="${i}"]`);
-        slot.innerHTML = '<span class="slot-plus">+</span>';
-        slot.addEventListener('click', openFilePicker);
+        const slot  = document.querySelector(`.strip-slot[data-index="${i}"]`);
+        if (!slot) continue;
+        const fresh = slot.cloneNode(false);
+        slot.parentNode.replaceChild(fresh, slot);
+        fresh.innerHTML = '<span class="slot-plus">+</span>';
+        fresh.addEventListener('click', openFilePicker);
     }
 }
 
 /* ═══════════════════════════════════════════════════
-   SET ACTIVE SLOT (preview + highlight)
+   SET ACTIVE SLOT
 ═══════════════════════════════════════════════════ */
 function setActiveSlot(index) {
     if (index < 0 || index >= photos.length) return;
     activeSlotIndex = index;
 
-    // Update preview image
+    const photo = photos[index];
     dropZone.style.display   = 'none';
     previewImg.style.display = 'block';
-    previewImg.src           = photos[index].filtered;
-    previewImg.style.filter  = 'none';   // filter already baked into src
+    previewImg.src           = photo.filtered;
 
-    // Sync filter buttons to THIS photo's saved filter
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === photos[index].filter);
+        btn.classList.toggle('active', btn.dataset.filter === photo.filter);
     });
 
-    // Highlight strip slot
     document.querySelectorAll('.strip-slot').forEach((s, i) => {
         s.classList.toggle('active-slot', i === index);
     });
 
-    // Show/hide nav arrows
-    const hasMultiple = photos.length > 1;
-    prevNavBtn.classList.toggle('visible', hasMultiple && index > 0);
-    nextNavBtn.classList.toggle('visible', hasMultiple && index < photos.length - 1);
+    const multi = photos.length > 1;
+    prevNavBtn.classList.toggle('visible', multi && index > 0);
+    nextNavBtn.classList.toggle('visible', multi && index < photos.length - 1);
 
-    // Update dots
     updateDots();
 }
 
-/* ═══════════════════════════════════════════════════
-   PREVIEW NAVIGATION
-═══════════════════════════════════════════════════ */
 prevNavBtn.addEventListener('click', () => setActiveSlot(activeSlotIndex - 1));
 nextNavBtn.addEventListener('click', () => setActiveSlot(activeSlotIndex + 1));
 
 /* ═══════════════════════════════════════════════════
-   SLOT INDICATOR DOTS
+   DOTS
 ═══════════════════════════════════════════════════ */
 function updateDots() {
     slotDotsEl.innerHTML = '';
-
-    if (photos.length <= 1) {
-        slotDotsEl.classList.remove('visible');
-        return;
-    }
-
+    if (photos.length <= 1) { slotDotsEl.classList.remove('visible'); return; }
     slotDotsEl.classList.add('visible');
     photos.forEach((_, i) => {
         const dot = document.createElement('div');
-        dot.className = 'slot-dot' +
-            (photos[i] ? ' filled' : '') +
-            (i === activeSlotIndex ? ' active' : '');
+        dot.className = `slot-dot filled${i === activeSlotIndex ? ' active' : ''}`;
         dot.addEventListener('click', () => setActiveSlot(i));
         slotDotsEl.appendChild(dot);
     });
 }
 
 /* ═══════════════════════════════════════════════════
-   SHOW EMPTY STATE
+   EMPTY STATE
 ═══════════════════════════════════════════════════ */
 function showEmptyState() {
     previewImg.style.display = 'none';
@@ -241,96 +185,86 @@ function showEmptyState() {
     slotDotsEl.classList.remove('visible');
     prevNavBtn.classList.remove('visible');
     nextNavBtn.classList.remove('visible');
-
-    // Reset filter buttons to Normal
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.filter === 'none');
     });
 }
+
 /* ═══════════════════════════════════════════════════
-   FILTERS
+   FILTERS — only affect the active photo
 ═══════════════════════════════════════════════════ */
-document.getElementById('filtersRow').addEventListener('click', e => {
+filtersRow.addEventListener('click', e => {
     const btn = e.target.closest('.filter-btn');
     if (!btn || photos.length === 0) return;
 
     const filterValue = btn.dataset.filter;
     const photo       = photos[activeSlotIndex];
-
-    // No-op if this filter is already applied to this photo
     if (photo.filter === filterValue) return;
 
-    // Update button highlight
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    // Save this filter on this specific photo only
     photo.filter = filterValue;
 
-    // Bake the filter into a new dataURL for this photo only
     applyFilterToPhoto(activeSlotIndex, filterValue, () => {
         previewImg.src = photos[activeSlotIndex].filtered;
-
         const stripImg = document.getElementById(`strip-img-${activeSlotIndex}`);
         if (stripImg) stripImg.src = photos[activeSlotIndex].filtered;
     });
 });
 
-/* ═══════════════════════════════════════════════════
-   APPLY FILTER TO ONE PHOTO via Canvas
-   Always renders from .original so filters never compound
-═══════════════════════════════════════════════════ */
 function applyFilterToPhoto(index, filterValue, callback) {
     const photo = photos[index];
     const image = new Image();
-
     image.onload = () => {
         canvas.width  = image.naturalWidth;
         canvas.height = image.naturalHeight;
-
         ctx.filter = filterValue === 'none' ? 'none' : filterValue;
         ctx.drawImage(image, 0, 0);
-        ctx.filter = 'none';   // always reset after draw
-
+        ctx.filter = 'none';
         photo.filtered = canvas.toDataURL('image/jpeg', 0.92);
         if (callback) callback();
     };
-
-    // Always start from the original — never from filtered
     image.src = photo.original;
 }
 
 /* ═══════════════════════════════════════════════════
-   UPDATE UI STATE
+   UPDATE UI
 ═══════════════════════════════════════════════════ */
 function updateUI() {
     const count = photos.length;
-
-    // Counter badge
     counterBadge.textContent = `${count} / ${MAX_PHOTOS}`;
     stripCountEl.textContent = `${count} / ${MAX_PHOTOS}`;
-
-    // Add photo button
-    addPhotoBtn.disabled = count >= MAX_PHOTOS;
+    addPhotoBtn.disabled    = count >= MAX_PHOTOS;
     addPhotoBtn.textContent = count >= MAX_PHOTOS
         ? '✓ All Photos Added'
         : `+ Add Photo (${count}/${MAX_PHOTOS})`;
-
-    // Next button
     nextBtn.classList.toggle('ready', count === MAX_PHOTOS);
 }
 
 /* ═══════════════════════════════════════════════════
-   NEXT — pass filtered photos to result page
+   NEXT — upload photos to server then navigate
 ═══════════════════════════════════════════════════ */
-function goNext() {
+async function goNext() {
     if (photos.length < MAX_PHOTOS) return;
 
+    nextBtn.disabled    = true;
+    nextBtn.textContent = 'Uploading…';
+
     const filteredURLs = photos.map(p => p.filtered);
+
+    // Keep in sessionStorage as fallback for editframe
     sessionStorage.setItem('boothPhotos', JSON.stringify(filteredURLs));
 
-    const params = new URLSearchParams(window.location.search);
-    const frame  = params.get('frame') || 'classic-baby-pink';
+    try {
+        await BoothAPI.uploadPhotos(filteredURLs);
+    } catch (err) {
+        console.warn('Photo upload failed (offline mode):', err);
+    }
+
+    const frame = new URLSearchParams(window.location.search).get('frame')
+        || sessionStorage.getItem('boothFrameType')
+        || 'classic-baby-pink';
+
     window.location.href = `editFrame.html?frame=${frame}`;
 }
 
@@ -344,16 +278,23 @@ function toggleMenu() {
 /* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
-// Wire up empty slot clicks to open file picker
 document.querySelectorAll('.strip-slot').forEach(slot => {
     slot.addEventListener('click', () => {
         const index = parseInt(slot.dataset.index);
-        if (photos[index]) {
-            setActiveSlot(index);
-        } else {
-            openFilePicker();
-        }
+        photos[index] ? setActiveSlot(index) : openFilePicker();
     });
 });
 
 updateUI();
+
+// Start backend session
+(async () => {
+    const frame = new URLSearchParams(window.location.search).get('frame')
+        || 'classic-baby-pink';
+    try {
+        await BoothAPI.startSession(frame, 'upload');
+    } catch (err) {
+        console.warn('Session start failed (offline mode):', err);
+        sessionStorage.setItem('boothFrameType', frame);
+    }
+})();

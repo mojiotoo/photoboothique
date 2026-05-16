@@ -92,15 +92,12 @@ function startCountdown() {
    CAPTURE PHOTO
 ═══════════════════════════════════════════════════ */
 function capturePhoto() {
-    // Flash effect
     flashEl.classList.add('flash');
     setTimeout(() => flashEl.classList.remove('flash'), 150);
 
-    // Size canvas to video resolution
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
 
-    // Apply same filter to canvas and mirror to match preview
     ctx.filter = activeFilter === 'none' ? 'none' : activeFilter;
     ctx.save();
     ctx.scale(-1, 1);
@@ -127,16 +124,13 @@ function addPhotoToStrip(dataURL) {
     const slot = document.querySelector(`.strip-slot[data-index="${index}"]`);
     if (!slot) return;
 
-    // Clear placeholder
     slot.innerHTML = '';
 
-    // Photo thumbnail
     const img = document.createElement('img');
     img.src = dataURL;
     img.alt = `Photo ${index + 1}`;
     slot.appendChild(img);
 
-    // Retake button (appears on hover via CSS)
     const retakeBtn = document.createElement('div');
     retakeBtn.className = 'retake-btn';
     retakeBtn.textContent = '✕ Retake';
@@ -149,17 +143,14 @@ function addPhotoToStrip(dataURL) {
     slot.classList.add('filled', 'latest');
     setTimeout(() => slot.classList.remove('latest'), 600);
 
-    // Update counter
     stripCountEl.textContent = `${photos.length} / ${MAX_PHOTOS}`;
 
-    // Update strip title from URL param
     const params = new URLSearchParams(window.location.search);
     const frame  = params.get('frame') || 'strip';
     stripTitleEl.textContent = frame
         .replace(/-/g, ' ')
         .replace(/\b\w/g, c => c.toUpperCase());
 
-    // All photos taken — enable Next
     if (photos.length === MAX_PHOTOS) {
         takePhotoBtn.disabled = true;
         takePhotoBtn.textContent = '✓ All Done!';
@@ -170,14 +161,13 @@ function addPhotoToStrip(dataURL) {
 function retakePhoto(index) {
     if (isCounting) return;
 
-    // Remove this photo and all taken after it
     for (let i = index; i < photos.length; i++) {
         const slot = document.querySelector(`.strip-slot[data-index="${i}"]`);
         slot.innerHTML = '<span class="slot-plus">+</span>';
         slot.classList.remove('filled', 'latest');
     }
 
-    photos.splice(index);   // remove from index onwards
+    photos.splice(index);
 
     stripCountEl.textContent = `${photos.length} / ${MAX_PHOTOS}`;
     takePhotoBtn.disabled    = false;
@@ -186,15 +176,30 @@ function retakePhoto(index) {
 }
 
 /* ═══════════════════════════════════════════════════
-   NAVIGATION
+   NAVIGATION — upload photos then go to editFrame
 ═══════════════════════════════════════════════════ */
-function goNext() {
+async function goNext() {
     if (photos.length < MAX_PHOTOS) return;
 
+    // Disable button and show progress
+    nextBtn.disabled     = true;
+    nextBtn.textContent  = 'Uploading…';
+
+    // Keep photos in sessionStorage as fallback for editframe
     sessionStorage.setItem('boothPhotos', JSON.stringify(photos));
 
-    const params = new URLSearchParams(window.location.search);
-    const frame  = params.get('frame') || 'classic-baby-pink';
+    try {
+        // Upload all 4 photos to server in one batch call
+        await BoothAPI.uploadPhotos(photos);
+    } catch (err) {
+        console.warn('Photo upload failed (offline mode):', err);
+        // Continue anyway — editframe will use sessionStorage
+    }
+
+    const frame = new URLSearchParams(window.location.search).get('frame')
+        || sessionStorage.getItem('boothFrameType')
+        || 'classic-baby-pink';
+
     window.location.href = `editFrame.html?frame=${frame}`;
 }
 
@@ -205,9 +210,28 @@ function toggleMenu() {
 /* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
-video.style.display = 'none';   // hide until camera is ready
+video.style.display = 'none';
 startCamera();
 
+// Start backend session (frame type comes from URL → set by chooseframe page)
+(async () => {
+    const frame = new URLSearchParams(window.location.search).get('frame')
+        || 'classic-baby-pink';
+    try {
+        await BoothAPI.startSession(frame, 'photobooth');
+    } catch (err) {
+        console.warn('Session start failed (offline mode):', err);
+        // Store frame so goNext() can still read it
+        sessionStorage.setItem('boothFrameType', frame);
+    }
+})();
+
+// Stop camera + best-effort session cleanup on leave
 window.addEventListener('beforeunload', () => {
     if (stream) stream.getTracks().forEach(t => t.stop());
+    // Use sendBeacon for cleanup so it fires even on tab close
+    const token = sessionStorage.getItem('boothToken');
+    if (token) {
+        navigator.sendBeacon(`/api/session/${token}`, JSON.stringify({ _method: 'DELETE' }));
+    }
 });

@@ -700,13 +700,36 @@ function goBack() {
 }
 
 async function goPreview() {
+    const btn = document.querySelector('.btn-preview');
+    if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+
     try {
         const dataURL = await exportFrame();
+
+        // Store locally as fallback (preview.html can use this if API call fails)
         sessionStorage.setItem('previewImage', dataURL);
         sessionStorage.setItem('previewFrame', st.frameType);
-        window.location.href = 'preview.html';
-    } catch(err) {
-        console.error('Export failed:', err);
-        alert('Could not generate preview. Please try again.');
+
+        // Upload final strip to Cloudinary, delete 4 temp photos server-side
+        const strip = await BoothAPI.saveStrip(dataURL, {
+            isPublic: false,
+            hasDate:  st.addDate,
+            hasTime:  st.addTime,
+        });
+
+        // Navigate to preview with strip ID so friend's QR/download feature works
+        window.location.href = `preview.html?strip_id=${strip.strip_id}`;
+
+    } catch (err) {
+        console.error('Export/upload failed:', err);
+
+        // Fallback: use sessionStorage if backend unavailable
+        const fallback = sessionStorage.getItem('previewImage');
+        if (fallback) {
+            window.location.href = 'preview.html';
+        } else {
+            alert('Could not generate preview. Please try again.');
+            if (btn) { btn.disabled = false; btn.textContent = 'See Preview →'; }
+        }
     }
 }

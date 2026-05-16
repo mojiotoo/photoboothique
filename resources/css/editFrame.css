@@ -16,11 +16,8 @@
 
 body { font-family: 'Poppins', sans-serif; }
 
-/* Lock this page to viewport — no page-level scroll */
-html, body { height: 100vh !important; overflow: hidden !important; }
-
-/* Hide footer — this is an editor tool, not a content page */
-footer { display: none !important; }
+/* Allow vertical scroll so footer is visible when scrolling down */
+html, body { overflow-x: hidden; }
 
 /* Shrink navbar's oversized margins so editor gets more vertical space */
 #navbar {
@@ -257,16 +254,17 @@ footer { display: none !important; }
     display: grid;
     width: 100%;
     position: absolute;
-    z-index: 1;  /* above PNG background (0) */
+    z-index: 1;   /* above frame background, below PNG overlay (5) */
 }
 
 /* Individual photo slot */
 .frame-slot {
     position: relative;
-    overflow: hidden;          /* clip image to slot — prevents frame overflow */
+    overflow: hidden;
     cursor: pointer;
-    background: rgba(200,200,200,0.10);
+    background: transparent;   /* transparent so PNG background shows through */
     transition: outline 0.15s;
+}
 }
 
 .frame-slot.drag-over {
@@ -325,19 +323,19 @@ footer { display: none !important; }
     will-change: transform;
 }
 
-/* ── PNG frame background ─────────────────────────────────────
-   The PNG is placed UNDER the photo slots (z-index: 0).
-   Photos (z-index: 1) render on top of the PNG's black slot areas.
-   Stickers (z-index: 10) sit above everything.
-─────────────────────────────────────────────────────────────── */
+/* ── PNG frame overlay ─────────────────────────────────────
+   Black photo-slot pixels converted to transparent in JS.
+   Sits ABOVE photos (z:5) showing only the decorative frame.
+   Below stickers (z:10) and footer text (z:6).
+─────────────────────────────────────────────────────────── */
 .frame-png-overlay {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;       /* stretch to fill frame dimensions exactly */
+    object-fit: fill;
     pointer-events: none;
-    z-index: 0;             /* BACKGROUND — beneath photo slots */
+    z-index: 5;
     display: block;
     -webkit-user-drag: none;
     user-select: none;
@@ -352,7 +350,7 @@ footer { display: none !important; }
     position: absolute;
     bottom: 0; left: 0;
     width: 100%;
-    z-index: 6;  /* above PNG (0) and slots (1), below stickers (10) */
+    z-index: 6;
 }
 
 .frame-logo {
