@@ -16,7 +16,7 @@
     <nav id="navbar">
         <img src="/assets/logo.png" alt="Logo" class="logo-image">
         <ul id="nav-menu">
-            <li><a href="home.html" >Home</a></li>
+            <li><a href="home.html">Home</a></li>
             <li><a href="photobooth.html" class="active">Photobooth</a></li>
             <li><a href="gallery.html">Gallery</a></li>
         </ul>
@@ -55,15 +55,26 @@
                 <!-- White flash on capture -->
                 <div class="flash-overlay" id="flashOverlay"></div>
 
-                <!-- Shown when camera is off -->
+                <!-- Shown when camera is off / permission needed -->
                 <div class="no-camera" id="noCameraMsg">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                         <circle cx="12" cy="13" r="4"/>
                         <line x1="2" y1="2" x2="22" y2="22" stroke="rgba(255,255,255,0.4)"/>
                     </svg>
-                    <span>Camera access required</span>
-                    <button onclick="startCamera()">Enable Camera</button>
+                    <span id="noCameraText">Camera access required</span>
+                    <button id="enableCameraBtn" onclick="requestCameraPermission()">Enable Camera</button>
+                </div>
+
+                <!-- Permission denied state -->
+                <div class="no-camera" id="permissionDeniedMsg" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    <span>Camera permission denied</span>
+                    <p class="permission-hint">Please allow camera access in your browser settings, then refresh the page.</p>
+                    <button onclick="location.reload()">Refresh Page</button>
                 </div>
             </div>
 
@@ -116,28 +127,28 @@
     <footer>
         <div class="footer-top">
             <div class="footer-brand">
-            <img src="/assets/footer.png" alt="Logo" class="footer-logo">
-            <p>Your online photobooth bestie<br>p.boothique@gmail.com<br>+62 1234 5678 9012</p>
+                <img src="/assets/footer.png" alt="Logo" class="footer-logo">
+                <p>Your online photobooth bestie<br>p.boothique@gmail.com<br>+62 1234 5678 9012</p>
             </div>
 
             <div class="footer-col">
-            <h4>Quick Links</h4>
-            <ul>
-                <li><a href="home.html">Home</a></li>
-                <li><a href="photobooth.html">Photobooth</a></li>
-                <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="login.html">Login/Register</a></li>
-            </ul>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="photobooth.html">Photobooth</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="login.html">Login/Register</a></li>
+                </ul>
             </div>
 
             <div class="footer-col">
-            <h4>Support</h4>
-            <ul>
-                <li><a href="#">FAQs</a></li>
-                <li><a href="#">Whatsapp</a></li>
-                <li><a href="#">Help Center</a></li>
-                <li><a href="#">Forum</a></li>
-            </ul>
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Whatsapp</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Forum</a></li>
+                </ul>
             </div>
 
             <img src="/assets/stars-footer.png" alt="stars" class="stars-footer">
@@ -152,8 +163,63 @@
             const menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
         }
-    </script>
 
+        // Check camera permission state on load
+        async function checkCameraPermission() {
+            try {
+                // Check via Permissions API if available
+                if (navigator.permissions) {
+                    const result = await navigator.permissions.query({ name: 'camera' });
+
+                    if (result.state === 'granted') {
+                        // Permission already granted — start camera directly
+                        startCamera();
+                    } else if (result.state === 'denied') {
+                        // Permission denied — show denied UI
+                        showPermissionDenied();
+                    }
+                    // 'prompt' state — show the Enable Camera button (default UI)
+
+                    // Listen for permission changes
+                    result.onchange = () => {
+                        if (result.state === 'granted') {
+                            hidePermissionDenied();
+                            startCamera();
+                        } else if (result.state === 'denied') {
+                            showPermissionDenied();
+                        }
+                    };
+                }
+                // If Permissions API not available, just show Enable Camera button (default)
+            } catch (err) {
+                console.warn('Permissions API not supported:', err);
+                // Fallback: try starting camera silently
+                startCamera();
+            }
+        }
+
+        function requestCameraPermission() {
+            const btn = document.getElementById('enableCameraBtn');
+            btn.disabled = true;
+            btn.textContent = 'Requesting...';
+            startCamera();
+        }
+
+        function showPermissionDenied() {
+            document.getElementById('noCameraMsg').style.display = 'none';
+            document.getElementById('permissionDeniedMsg').style.display = 'flex';
+            document.getElementById('cameraStatus').className = 'camera-status off';
+            document.getElementById('statusText').textContent = 'Permission Denied';
+        }
+
+        function hidePermissionDenied() {
+            document.getElementById('permissionDeniedMsg').style.display = 'none';
+            document.getElementById('noCameraMsg').style.display = 'flex';
+        }
+
+        checkCameraPermission();
+    </script>
+    <script src="/js/api.js"></script>
     <script src="../js/photobooth.js"></script>
 </body>
 </html>

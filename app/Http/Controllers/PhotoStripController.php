@@ -17,95 +17,158 @@ class PhotoStripController extends Controller
     }
 
     /**
-     * Save a finished photo strip.
-     * Called by the frontend after the strip image is finalized.
+     * Save a finished photo strip from base64 JSON.
+     * Body: { image_base64, frame_type, add_date, add_time }
      *
-     * Expects: multipart/form-data with field "strip_image"
+     * If user is logged in (via firebase.auth middleware), firebase_uid is saved.
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'strip_image' => 'required|image|max:10240', // 10 MB
+        $data = $request->validate([
+            'image_base64' => 'required|string',
+            'frame_type'   => 'required|string|max:64',
+            'add_date'     => 'sometimes|boolean',
+            'add_time'     => 'sometimes|boolean',
         ]);
 
-        $file = $request->file('strip_image');
+        // Strip the data URL prefix if present
+        $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data['image_base64']);
+        $binary = base64_decode($base64, true);
 
-        // 1. upload to Cloudinary
-        $result = $this->cloudinary->uploadStrip($file->getRealPath());
+        if ($binary === false) {
+            return response()->json(['message' => 'Invalid base64 image'], 422);
+        }
 
-        // 2. save a DB record
+        // Write to temp file for Cloudinary uploader
+        $tmp = tempnam(sys_get_temp_dir(), 'strip_') . '.jpg';
+        file_put_contents($tmp, $binary);
+
+        try {
+            $result = $this->cloudinary->uploadStrip($tmp);
+        } finally {
+            @unlink($tmp);
+        }
+
+        // Build download token + QR URL
+        $downloadToken = Str::random(40);
+        $downloadUrl   = route('strip.download', $downloadToken);
+        $qrUrl         = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='
+            . urlencode($downloadUrl);
+
+        // Pull firebase_uid from middleware (null if guest)
+        $firebaseUid = $request->attributes->get('firebase_uid');
+
         $strip = PhotoStrip::create([
-            'user_id'              => auth()->id(),
-            'cloudinary_public_id' => $result['public_id'],
-            'image_url'            => $result['url'],
-            'download_token'       => Str::random(40),
-            'token_expires_at'     => now()->addMinutes(30),
+            'firebase_uid'   => $firebaseUid,
+            'frame_type'     => $data['frame_type'],
+            'cloudinary_url' => $result['url'],
+            'cloudinary_id'  => $result['public_id'],
+            'qr_url'         => $qrUrl,
+            'has_date'       => $data['add_date'] ?? false,
+            'has_time'       => $data['add_time'] ?? false,
+            'is_public'      => false,
+            'likes'          => 0,
+            'download_count' => 0,
         ]);
 
-        // 3. return the QR target + image url to the frontend
+        cache()->put("strip_token:{$downloadToken}", $strip->id, now()->addMinutes(30));
+
         return response()->json([
-            'strip_id'  => $strip->id,
-            'qr_url'    => route('strip.qr', $strip->download_token),
-            'image_url' => $strip->image_url,
+            'strip_id'       => $strip->id,
+            'cloudinary_url' => $strip->cloudinary_url,
+            'qr_url'         => $strip->qr_url,
+            'download_url'   => $downloadUrl,
         ]);
     }
 
     /**
-     * Returns the QR code PNG itself.
-     * Use as <img src="/qr/{token}">
-     *
-     * Uses the free goqr.me API — no package needed.
+     * Show a single strip (used by preview.html via ?strip_id=...).
+     */
+    public function show(string $id)
+    {
+        $strip = PhotoStrip::findOrFail($id);
+
+        return response()->json([
+            'strip_id'       => $strip->id,
+            'frame_type'     => $strip->frame_type,
+            'cloudinary_url' => $strip->cloudinary_url,
+            'qr_url'         => $strip->qr_url,
+            'has_date'       => $strip->has_date,
+            'has_time'       => $strip->has_time,
+        ]);
+    }
+
+    /**
+     * Returns the QR code PNG.
      */
     public function qrCode(string $token)
     {
         $downloadUrl = route('strip.download', $token);
-
-        $qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='
+        $qrApiUrl    = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='
             . urlencode($downloadUrl);
 
-        $qrImage = file_get_contents($qrApiUrl);
+        $qrImage = @file_get_contents($qrApiUrl);
+        if ($qrImage === false) abort(502, 'QR service unavailable');
 
         return response($qrImage)->header('Content-Type', 'image/png');
     }
 
     /**
-     * The page the QR code opens on the phone.
-     * Checks expiry, marks as downloaded, sends the image.
+     * Download endpoint — QR opens this on phone.
      */
     public function download(string $token)
     {
-        $strip = PhotoStrip::where('download_token', $token)->firstOrFail();
+        $stripId = cache()->get("strip_token:{$token}");
+        if (!$stripId) abort(410, 'This QR code has expired. Please generate a new one.');
 
-        if ($strip->token_expires_at && now()->greaterThan($strip->token_expires_at)) {
-            abort(410, 'This QR code has expired. Please generate a new one.');
+        $strip = PhotoStrip::findOrFail($stripId);
+        $strip->increment('download_count');
+
+        return redirect($strip->cloudinary_url);
+    }
+
+    /**
+     * Gallery — public strips, paginated.
+     */
+    public function gallery(Request $request)
+    {
+        $query = PhotoStrip::public()->latest();
+
+        if ($frame = $request->query('frame')) {
+            $query->forFrame($frame);
         }
 
-        $strip->update(['downloaded' => true]);
-
-        // redirect straight to the Cloudinary image
-        return redirect($strip->image_url);
+        return response()->json($query->paginate(12));
     }
 
     /**
-     * Gallery page — shows all of this user's strips.
+     * Logged-in user's own strips (requires firebase.auth:required).
      */
-    public function gallery()
+    public function myStrips(Request $request)
     {
-        $strips = PhotoStrip::where('user_id', auth()->id())
+        $uid = $request->attributes->get('firebase_uid');
+
+        $strips = PhotoStrip::where('firebase_uid', $uid)
             ->latest()
-            ->get();
+            ->paginate(20);
 
-        return view('gallery', compact('strips'));
+        return response()->json($strips);
     }
 
     /**
-     * Delete a strip (from gallery + from Cloudinary).
+     * Delete a strip (requires firebase.auth:required + ownership).
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, string $id)
     {
-        $strip = PhotoStrip::where('user_id', auth()->id())->findOrFail($id);
+        $uid   = $request->attributes->get('firebase_uid');
+        $strip = PhotoStrip::findOrFail($id);
 
-        $this->cloudinary->deleteStrip($strip->cloudinary_public_id);
+        // Only owner can delete
+        if ($strip->firebase_uid !== $uid) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $this->cloudinary->deleteStrip($strip->cloudinary_id);
         $strip->delete();
 
         return response()->json(['success' => true]);

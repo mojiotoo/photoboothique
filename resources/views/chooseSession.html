@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Session</title>
-    <link rel="stylesheet" href="../css/layout.css">
-    <link rel="stylesheet" href="../css/home.css">
-    <link rel="stylesheet" href="../css/session.css">
+    <title>Choose Session</title>
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/session.css">
 </head>
 <body>
     <div class="background">
@@ -17,12 +17,12 @@
     <nav id="navbar">
         <img src="/assets/logo.png" alt="Logo" class="logo-image">
         <ul id="nav-menu">
-            <li><a href="home.html" class="active">Home</a></li>
-            <li><a href="photobooth.html">Photobooth</a></li>
-            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/choose-frame">Photobooth</a></li>
+            <li><a href="/gallery">Gallery</a></li>
         </ul>
         <div class="nav-right">
-            <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+            <button class="login-btn" onclick="window.location.href='/login'">Login</button>
             <button class="hamburger" onclick="toggleMenu()">☰</button>
         </div>
     </nav>
@@ -34,16 +34,16 @@
                     <span class="deco-star">✦</span>
                     <span class="deco-star">✦</span>
                     <span class="deco-star">✦</span>
- 
+
                     <div class="pick-cards">
-                        <a class="pick-card" href="photobooth.html">
+                        <a class="pick-card" id="photoboothLink" href="/photobooth">
                             <div class="pick-card-icon">
                                 <img src="/assets/photoboothicon.png" alt="Photobooth" class="pick-card-img">
                             </div>
                             <div class="pick-card-label">Photobooth</div>
                         </a>
- 
-                        <a class="pick-card" href="uploadphoto.html">
+
+                        <a class="pick-card" id="uploadLink" href="/upload-photo">
                             <div class="pick-card-icon">
                                 <img src="/assets/uploadphotoicon.png" alt="Upload Photo" class="pick-card-img">
                             </div>
@@ -51,13 +51,13 @@
                         </a>
                     </div>
                 </div>
- 
+
                 <div class="frame-cta">
                     <img src="/assets/mymelody1.png" alt="My Melody" class="sticker-left">
                     <h1 class="choose-text">Choose your pick!</h1>
                     <img src="/assets/mymelody2.png" alt="My Melody" class="sticker-right">
                 </div>
- 
+
             </div>
         </div>
     </main>
@@ -65,28 +65,28 @@
     <footer>
         <div class="footer-top">
             <div class="footer-brand">
-            <img src="/assets/footer.png" alt="Logo" class="footer-logo">
-            <p>Your online photobooth bestie<br>p.boothique@gmail.com<br>+62 1234 5678 9012</p>
+                <img src="/assets/footer.png" alt="Logo" class="footer-logo">
+                <p>Your online photobooth bestie<br>p.boothique@gmail.com<br>+62 1234 5678 9012</p>
             </div>
 
             <div class="footer-col">
-            <h4>Quick Links</h4>
-            <ul>
-                <li><a href="home.html">Home</a></li>
-                <li><a href="photobooth.html">Photobooth</a></li>
-                <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="login.html">Login/Register</a></li>
-            </ul>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/choose-frame">Photobooth</a></li>
+                    <li><a href="/gallery">Gallery</a></li>
+                    <li><a href="/login">Login/Register</a></li>
+                </ul>
             </div>
 
             <div class="footer-col">
-            <h4>Support</h4>
-            <ul>
-                <li><a href="#">FAQs</a></li>
-                <li><a href="#">Whatsapp</a></li>
-                <li><a href="#">Help Center</a></li>
-                <li><a href="#">Forum</a></li>
-            </ul>
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Whatsapp</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Forum</a></li>
+                </ul>
             </div>
 
             <img src="/assets/stars-footer.png" alt="stars" class="stars-footer">
@@ -101,15 +101,19 @@
             const menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
         }
-    </script>
 
-    <script>
-        function selectFrame(frameId, el) {
-            document.querySelectorAll('.frame-card').forEach(card => card.classList.remove('selected'));
-            el.classList.add('selected');
-            sessionStorage.setItem('selectedFrame', frameId);
-            window.location.href = `photobooth.html?frame=${frameId}`;
-        }
+        // Carry the ?frame=... param forward to the next page
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const frame  = params.get('frame') || sessionStorage.getItem('selectedFrame');
+
+            if (frame) {
+                const pbLink = document.getElementById('photoboothLink');
+                const upLink = document.getElementById('uploadLink');
+                if (pbLink) pbLink.href = `/photobooth?frame=${frame}`;
+                if (upLink) upLink.href = `/upload-photo?frame=${frame}`;
+            }
+        })();
     </script>
 
 </body>
