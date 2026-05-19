@@ -3,7 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PhotoStripController;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 /*
 |--------------------------------------------------------------------------
 | Static HTML page routes (views served as raw HTML — no Blade)
@@ -19,10 +21,7 @@ Route::get('/photobooth',     fn() => file_get_contents(resource_path('views/pho
 Route::get('/upload-photo',   fn() => file_get_contents(resource_path('views/uploadphoto.html')));
 Route::get('/preview', fn() => view('preview'))->name('preview');
 Route::get('/qrcode', fn() => view('qrcode'))->name('qrcode');
-Route::get('/gallery', function() {
-    $strips = \App\Models\PhotoStrip::latest()->get(); // ← ganti ini
-    return view('gallery', compact('strips'));
-});
+Route::get('/gallery', fn() => view('gallery'))->name('gallery');
 Route::get('/login',        fn() => file_get_contents(resource_path('views/login.html')));
 Route::get('/forgot-password',        fn() => file_get_contents(resource_path('views/forgot-password.html')));
 Route::get('/new-password',        fn() => file_get_contents(resource_path('views/new-password.html')));
@@ -61,4 +60,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+
+Route::post('/register', function (Request $request) {
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|string|min:8|confirmed',
+    ]);
+
+    $user = User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => Hash::make($data['password']),
+    ]);
+
+    auth()->login($user);
+
+    return response()->json(['success' => true]);
 });

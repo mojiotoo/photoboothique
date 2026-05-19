@@ -34,13 +34,15 @@
                 <h1 id="title">Welcome!</h1>
                 <p id="subtitle">Sign Up now</p>
                 <p id="subheaderform">Your Information >_<</p>
-                <form>
-                    <input type="text" placeholder="Name" class="input-field">
-                    <input type="email" placeholder="Email" class="input-field">
-                    <input type="password" placeholder="Password" class="input-field">
+                <form id="register-form">
+                    <input type="text" name="name" placeholder="Name" class="input-field" required />
+                    <input type="email" name="email" placeholder="Email" class="input-field" required />
+                    <input type="password" name="password" placeholder="Password" class="input-field" required />
+                    <input type="password" name="password_confirmation" placeholder="Confirm Password" class="input-field" required />
+                    <p id="register-error" style="color:#E7329B;font-size:14px;text-align:center;margin:0 0 4px;display:none;"></p>
                 </form>
-                <a href="#" class="have-account" onclick="window.location.href='/login'">Already have account</a>
-                <button class="register-btn" onclick="window.location.href='/login'">Register Now</button>
+                <a href="/login" class="have-account">Already have account</a>
+                <button type="submit" form="register-form" class="register-btn">Register Now</button>
             </div>
         </div>
     </main>
@@ -86,7 +88,10 @@
         }
     </script>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
     <script src="/js/api.js"></script>
-    <script src="../js/login.js"></script>
+    <script src="/js/register-static.js"></script>
 </body>
 </html>

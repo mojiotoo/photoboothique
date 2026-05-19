@@ -160,5 +160,10 @@
             }
         }
     </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth-navbar.js"></script>
 </body>
 </html>

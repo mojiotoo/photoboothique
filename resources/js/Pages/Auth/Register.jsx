@@ -1,120 +1,99 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import AuthLayout from '@/Layouts/AuthLayout';
+import { registerWithEmail, firebaseErrorMessage } from '@/lib/useFirebaseAuth';
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
+    const [form, setForm] = useState({
+        name: '', email: '', password: '', password_confirmation: '',
     });
+    const [error, setError]   = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const submit = (e) => {
+    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+    const handleRegister = async (e) => {
         e.preventDefault();
+        setError('');
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        if (!form.email || !form.name || !form.password) {
+            setError('Email, name, and password are required.'); return;
+        }
+        if (form.password.length < 8 && form.password.length > 12) {
+            setError('Password must be at 8-12 characters.'); return;
+        }
+        if (form.password !== form.password_confirmation) {
+            setError('Passwords do not match.'); return;
+        }
+
+        setLoading(true);
+        try {
+            await registerWithEmail(form.email, form.password, {
+                name: form.name,
+            });
+        } catch (err) {
+            setError(err?.code ? firebaseErrorMessage(err.code) : 'Registration failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <GuestLayout>
+        <AuthLayout showPic={false}>
             <Head title="Register" />
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+            <div className="auth-bow">🎀</div>
+            <h1 className="auth-title">Welcome!</h1>
+            <p className="auth-subtitle">Login now to save your strips to our cloud gallery</p>
 
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="mt-1 block w-full"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                    />
+            {error && <div className="auth-error">{error}</div>}
 
-                    <InputError message={errors.name} className="mt-2" />
+            <form onSubmit={handleRegister}>
+                <p className="auth-section">Your Information &gt;_&lt;</p>
+                <div className="auth-grid" style={{ marginBottom: 14 }}>
+                    <div className="auth-input-wrap">
+                        <span className="ico">✉️</span>
+                        <input type="email" placeholder="Email" value={form.email} onChange={set('email')} autoComplete="username" />
+                    </div>
+                    <div className="auth-input-wrap">
+                        <span className="ico">👤</span>
+                        <input type="text" placeholder="Name" value={form.name} onChange={set('name')} autoComplete="name" />
+                    </div>
+                    <div className="auth-input-wrap">
+                        <span className="ico">🔒</span>
+                        <input type="password" placeholder="Password" value={form.password} onChange={set('password')} autoComplete="new-password" />
+                    </div>
+                    <div className="auth-input-wrap">
+                        <span className="ico">📞</span>
+                        <input type="tel" placeholder="Phone Number" value={form.phone} onChange={set('phone')} autoComplete="tel" />
+                    </div>
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
+                <p className="auth-section">Additional Information :)</p>
+                <p className="auth-section-sub">Add your country of origin</p>
+                <div className="auth-country-wrap" style={{ marginBottom: 28 }}>
+                    <div className="auth-country-label">Country</div>
+                    <div className="auth-country-row">
+                        <span style={{ fontSize: '1.1rem' }}>{flag}</span>
+                        <select value={form.country} onChange={handleCountry}>
+                            {COUNTRIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                        </select>
+                    </div>
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                <div className="auth-reg-footer">
+                    <Link href={route('login')} className="auth-link">Already have account</Link>
+                    <button
+                        type="submit"
+                        className="btn-pink"
+                        style={{ flex: 'unset', padding: '13px 36px' }}
+                        disabled={loading}
                     >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
+                        {loading ? 'Registering...' : 'Register Now'}
+                    </button>
                 </div>
             </form>
-        </GuestLayout>
+        </AuthLayout>
     );
 }

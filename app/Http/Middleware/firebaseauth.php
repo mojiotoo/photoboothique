@@ -98,9 +98,38 @@ class FirebaseAuth
      */
     private function verifyToken(string $token): ?array
     {
+        // If the Kreait Firebase SDK is installed and credentials are configured,
+        // use it to verify the ID token. Otherwise fall back to a harmless
+        // development stub so existing flows keep working.
+        if (class_exists(\Kreait\Firebase\Factory::class) && env('FIREBASE_CREDENTIALS')) {
+            try {
+                $credentialsPath = env('FIREBASE_CREDENTIALS');
+                if (!file_exists($credentialsPath)) {
+                    logger()->warning('FIREBASE_CREDENTIALS set but file not found: ' . $credentialsPath);
+                    return null;
+                }
+
+                $factory = (new \Kreait\Firebase\Factory())->withServiceAccount($credentialsPath);
+                $auth = $factory->createAuth();
+
+                // verifyIdToken will throw if token is invalid/expired
+                $verified = $auth->verifyIdToken($token);
+                $claims = $verified->claims();
+
+                return [
+                    'uid'   => $claims->get('sub'),
+                    'email' => $claims->get('email'),
+                    'name'  => $claims->get('name'),
+                ];
+            } catch (\Throwable $e) {
+                logger()->warning('Firebase token verification failed: ' . $e->getMessage());
+                return null;
+            }
+        }
+
         // ──────────────────────────────────────────────────────────
         // DEV STUB — accepts any non-empty token and returns a fake user.
-        // Remove/replace this before going to production.
+        // Keep this only for local development when the SDK/credentials are absent.
         // ──────────────────────────────────────────────────────────
         if (empty($token)) return null;
 

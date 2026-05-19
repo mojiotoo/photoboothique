@@ -159,7 +159,13 @@ const BoothAPI = (() => {
 
     function logout() {
         sessionStorage.removeItem('firebaseToken');
-        // Temenmu's code akan tambahkan: firebase.auth().signOut();
+        try {
+            if (window.firebase && firebase.auth) {
+                firebase.auth().signOut().catch(() => {});
+            }
+        } catch (e) {
+            // ignore
+        }
     }
 
     /* ───────────────────────────────────────────────

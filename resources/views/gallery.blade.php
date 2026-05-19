@@ -25,7 +25,7 @@
             <li><a href="/gallery" class="active">Gallery</a></li>
         </ul>
         <div class="nav-right">
-            <button class="login-btn" onclick="window.location.href='/login'">Login</button>
+            <button id="nav-login-btn" class="login-btn" onclick="window.location.href='/login'">Login</button>
             <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
         </div>
     </nav>
@@ -37,33 +37,17 @@
                 <div class="gallery-title-group">
                     <h1 class="gallery-title">My Gallery</h1>
                 </div>
-                <p class="gallery-subtitle" id="photo-count">{{ count($strips) }} photo strip{{ count($strips) !== 1 ? 's' : '' }} saved</p>
+                <p class="gallery-subtitle" id="photo-count">Loading your gallery…</p>
                 <button class="select-all-btn" onclick="toggleSelectAll()">Select All</button>
             </div>
 
             <div class="gallery-carousel">
                 <button class="carousel-btn left" onclick="scrollGallery(-1)">&#8249;</button>
-                <div class="gallery-grid" id="gallery-grid">
-
-                    @forelse ($strips as $strip)
-                        <div class="gallery-card" data-id="{{ $strip->id }}" data-url="{{ $strip->cloudinary_url }}" onclick="toggleCard(this)">
-                            <img src="{{ $strip->cloudinary_url }}" alt="Photo strip">
-                            <div class="checkmark">&#10003;</div>
-                            <a class="download-icon" href="{{ $strip->cloudinary_url }}" download="photoboothique-strip.jpg" target="_blank" onclick="event.stopPropagation()">
-                                &#8595;
-                            </a>
-                        </div>
-                    @empty
-                        <div class="empty-state" id="empty-state">
-                            <p>&#10024; No photo strips yet!</p>
-                            <p>Start a session to create your first one.</p>
-                            <button class="start-btn" onclick="window.location.href='/choose-frame'">Start your session!</button>
-                        </div>
-                    @endforelse
-
-                </div>
+                <div class="gallery-grid" id="gallery-grid"></div>
                 <button class="carousel-btn right" onclick="scrollGallery(1)">&#8250;</button>
             </div>
+
+            <div id="gallery-loader" style="display:none;text-align:center;margin:20px 0;font-size:16px;color:#8BB1FF;">Loading your strips…</div>
 
             <div class="gallery-actions">
                 <button class="download-btn" onclick="downloadSelected()">Download Selected</button>
@@ -220,5 +204,12 @@
             }
         }
     </script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth-navbar.js"></script>
+    <script src="/js/gallery-static.js"></script>
 </body>
 </html>

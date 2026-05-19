@@ -33,23 +33,24 @@
                 <img src="/assets/login-bow.png" alt="pink-bow" class="login-bow">
                 <h1 id="title">Welcome!</h1>
                 <p id="subtitle">Login now to save your strips to our cloud gallery</p>
-                <form>
-                    <input type="email" placeholder="Email" class="input-field">
-                    <input type="password" placeholder="Password" class="input-field">
+                <form id="login-form">
+                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <input type="password" name="password" placeholder="Password" class="input-field" required>
+                    <p id="login-error" style="color:#E7329B;font-size:14px;text-align:center;margin:0 0 4px;display:none;"></p>
                 </form>
                 <div class="remember-row">
                     <ticket class="remember-me">
                         <input type="checkbox" id="remember">
                         <label for="remember">Remember Me</label>
                     </ticket>
-                    <a href="#" class="forgot-link" onclick="window.location.href='/forgot-password'">Forgot Password?</a>
+                    <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
                 </div>
                 <div class ='btn-row'>
-                    <button class="loginNow-btn" onclick="window.location.href='/'">Login Now</button>
-                    <button class="register-btn" onclick="window.location.href='/register'">Sign Up</button>
+                    <button type="submit" form="login-form" class="loginNow-btn">Login Now</button>
+                    <button type="button" class="register-btn" onclick="window.location.href='/register'">Sign Up</button>
                 </div>
                 <p>Or login with</p>
-                <button class="google-login-btn">Login with Google</button>
+                <button id="google-login-btn" class="google-login-btn" type="button">Login with Google</button>
             </div>
         </div>
     </main>
@@ -95,7 +96,10 @@
         }
     </script>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
     <script src="/js/api.js"></script>
-    <script src="../js/login.js"></script>
+    <script src="/js/login-static.js"></script>
 </body>
 </html>
