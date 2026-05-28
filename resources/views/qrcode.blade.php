@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/qrcode.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="/js/navbar-prerender.js"></script>
 </head>
 <body>
     <div class="background">

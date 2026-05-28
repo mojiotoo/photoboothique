@@ -1,129 +1,205 @@
 const emailInput = document.getElementById('forgot-email');
 const emailError = document.getElementById('email-error');
-const sendCodeBtn = document.getElementById('send-code-btn');
+const sendBtn = document.getElementById('send-code-btn');
 const stepsContainer = document.getElementById('forgot-steps');
-
-let currentOobCode = null;
-let targetEmail = null;
 
 function showError(msg) {
     if (!emailError) return;
     emailError.textContent = msg;
+    emailError.style.color = '#E7329B';
     emailError.style.display = msg ? 'block' : 'none';
 }
 
-function clearSteps() {
-    stepsContainer.innerHTML = '';
+function showSuccess(msg) {
+    if (!emailError) return;
+    emailError.textContent = msg;
+    emailError.style.color = '#5990FE';
+    emailError.style.display = msg ? 'block' : 'none';
 }
 
-function showCodeStep() {
-    clearSteps();
+// ── Resend state ──────────────────────────────────────────────────────────────
+let resendCount = 0;
+const MAX_RESENDS = 3;
+const RESEND_DELAY = 60;
+let resendInterval = null;
 
-    const info = document.createElement('p');
-    info.textContent = 'A verification email has been sent. Please open the email and copy the verification code (oobCode) from the link, then paste it below.';
-    info.style.fontSize = '13px';
-    info.style.color = '#444';
+function createResendUI(email) {
+    if (document.getElementById('resend-row')) return; // already exists
 
-    const codeInput = document.createElement('input');
-    codeInput.id = 'reset-code';
-    codeInput.placeholder = 'Paste verification code here';
-    codeInput.className = 'input-field';
-    codeInput.style.display = 'block';
-    codeInput.style.marginTop = '8px';
+    const row = document.createElement('p');
+    row.id = 'resend-row';
+    row.style.cssText = 'font-size:12px;color:#aaa;margin:8px 0 0;text-align:center;';
 
-    const codeError = document.createElement('p');
-    codeError.id = 'code-error';
-    codeError.style.color = '#E7329B';
-    codeError.style.fontSize = '13px';
-    codeError.style.display = 'none';
+    const link = document.createElement('span');
+    link.id = 'resend-link';
+    link.style.cssText = 'cursor:pointer;color:#aaa;text-decoration:underline;';
+    link.textContent = 'Resend link';
 
-    const nextBtn = document.createElement('button');
-    nextBtn.textContent = 'Next';
-    nextBtn.className = 'sendverificationcode-btn';
-    nextBtn.style.marginTop = '8px';
+    const timer = document.createElement('span');
+    timer.id = 'resend-timer';
+    timer.style.display = 'none';
 
-    nextBtn.addEventListener('click', async () => {
-        const code = codeInput.value.trim();
-        codeError.style.display = 'none';
-        if (!code) { codeError.textContent = 'Please paste the verification code.'; codeError.style.display = 'block'; return; }
+    const exhausted = document.createElement('span');
+    exhausted.id = 'resend-exhausted';
+    exhausted.style.display = 'none';
+    exhausted.textContent = 'No more resends available';
 
+    row.appendChild(link);
+    row.appendChild(timer);
+    row.appendChild(exhausted);
+
+    // Insert after the error/success message element
+    emailError.insertAdjacentElement('afterend', row);
+
+    link.addEventListener('click', async () => {
+        if (resendCount >= MAX_RESENDS) return;
+        link.style.pointerEvents = 'none';
+        showError('');
         try {
-            const email = await firebase.auth().verifyPasswordResetCode(code);
-            // code valid
-            currentOobCode = code;
-            // ensure the code corresponds to the requested email
-            if (targetEmail && email.toLowerCase() !== targetEmail.toLowerCase()) {
-                codeError.textContent = 'This code does not match the email you entered.';
-                codeError.style.display = 'block';
-                return;
-            }
-            showPasswordStep();
+            await firebase.auth().sendPasswordResetEmail(email);
+            resendCount++;
+            showSuccess('Reset link sent again! Check your inbox.');
+            startResendCooldown(link, timer, exhausted);
         } catch (err) {
-            codeError.textContent = err?.message || 'Invalid or expired code.';
-            codeError.style.display = 'block';
+            link.style.pointerEvents = 'auto';
+            showError('Could not resend. Please try again.');
         }
     });
 
-    stepsContainer.appendChild(info);
-    stepsContainer.appendChild(codeInput);
-    stepsContainer.appendChild(codeError);
-    stepsContainer.appendChild(nextBtn);
+    startResendCooldown(link, timer, exhausted);
 }
 
-function showPasswordStep() {
-    clearSteps();
+function startResendCooldown(link, timer, exhausted) {
+    let secs = RESEND_DELAY;
+    link.style.display = 'none';
+    link.style.pointerEvents = 'none';
+    timer.style.display = 'inline';
+    timer.textContent = ` (resend in ${secs}s)`;
+
+    clearInterval(resendInterval);
+    resendInterval = setInterval(() => {
+        secs--;
+        timer.textContent = ` (resend in ${secs}s)`;
+        if (secs <= 0) {
+            clearInterval(resendInterval);
+            timer.style.display = 'none';
+            if (resendCount >= MAX_RESENDS) {
+                exhausted.style.display = 'inline';
+            } else {
+                link.style.display = 'inline';
+                link.style.pointerEvents = 'auto';
+            }
+        }
+    }, 1000);
+}
+
+// ── Send reset link button ────────────────────────────────────────────────────
+
+sendBtn.addEventListener('click', async () => {
+    showError('');
+    const email = (emailInput.value || '').trim();
+    if (!email) { showError('Please enter your email.'); return; }
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending…';
+
+    try {
+        await firebase.auth().sendPasswordResetEmail(email);
+
+        // Success — lock email field, show confirmation, show resend UI
+        emailInput.disabled = true;
+        showSuccess('Reset link sent! Check your inbox and click the link to set a new password.');
+        sendBtn.textContent = 'Go to Login';
+        sendBtn.disabled = false;
+        sendBtn.onclick = () => window.location.href = '/login';
+
+        createResendUI(email);
+
+    } catch (err) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send Reset Link';
+
+        const code = err?.code || '';
+        if (code === 'auth/user-not-found') showError('No account found with that email address.');
+        else if (code === 'auth/invalid-email') showError('Please enter a valid email address.');
+        else if (code === 'auth/too-many-requests') showError('Too many attempts. Please try again later.');
+        else if (code === 'auth/network-request-failed') showError('Network error. Please check your connection.');
+        else showError('Could not send reset email. Please try again.');
+    }
+});
+
+
+// ── Handle deep link from Firebase email (oobCode in URL) ────────────────────
+// When the user clicks the link in the Firebase email, they land here with
+// ?mode=resetPassword&oobCode=... in the URL → jump straight to new password.
+
+(function handleActionLink() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const oobCode = params.get('oobCode');
+        const mode = params.get('mode');
+        if (!oobCode || mode !== 'resetPassword') return;
+
+        firebase.auth().verifyPasswordResetCode(oobCode)
+            .then(email => {
+                // Pre-fill email and show the password reset form
+                if (emailInput) { emailInput.value = email; emailInput.disabled = true; }
+                sendBtn.style.display = 'none';
+                showPasswordStep(oobCode);
+            })
+            .catch(() => showError('This reset link is invalid or has expired. Please request a new one.'));
+    } catch (e) {
+        console.error('handleActionLink error', e);
+    }
+})();
+
+// ── New password step (reached via Firebase email link) ───────────────────────
+
+function showPasswordStep(oobCode) {
+    stepsContainer.innerHTML = '';
 
     const info = document.createElement('p');
     info.textContent = 'Enter your new password.';
-    info.style.fontSize = '13px';
-    info.style.color = '#444';
+    info.style.cssText = 'font-size:13px;color:#444;margin-bottom:8px;';
 
     const pw1 = document.createElement('input');
-    pw1.id = 'new-password';
-    pw1.type = 'password';
-    pw1.placeholder = 'New password';
-    pw1.className = 'input-field';
-    pw1.style.display = 'block';
-    pw1.style.marginTop = '8px';
+    pw1.type = 'password'; pw1.placeholder = 'New password';
+    pw1.className = 'input-field'; pw1.style.cssText = 'display:block;margin-top:8px;';
 
     const pw2 = document.createElement('input');
-    pw2.id = 'confirm-password';
-    pw2.type = 'password';
-    pw2.placeholder = 'Confirm password';
-    pw2.className = 'input-field';
-    pw2.style.display = 'block';
-    pw2.style.marginTop = '8px';
+    pw2.type = 'password'; pw2.placeholder = 'Confirm password';
+    pw2.className = 'input-field'; pw2.style.cssText = 'display:block;margin-top:8px;';
 
     const pwError = document.createElement('p');
-    pwError.id = 'pw-error';
-    pwError.style.color = '#E7329B';
-    pwError.style.fontSize = '13px';
-    pwError.style.display = 'none';
+    pwError.style.cssText = 'font-size:13px;display:none;margin-top:6px;';
 
-    const createBtn = document.createElement('button');
-    createBtn.textContent = 'Create New Password';
-    createBtn.className = 'sendverificationcode-btn';
-    createBtn.style.marginTop = '8px';
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save New Password';
+    saveBtn.className = 'sendverificationcode-btn';
+    saveBtn.style.marginTop = '8px';
 
-    createBtn.addEventListener('click', async () => {
+    saveBtn.addEventListener('click', async () => {
         pwError.style.display = 'none';
         const a = pw1.value || '';
         const b = pw2.value || '';
-        if (a.length < 6) { pwError.textContent = 'Password must be at least 6 characters.'; pwError.style.display = 'block'; return; }
-        if (a !== b) { pwError.textContent = 'Passwords do not match.'; pwError.style.display = 'block'; return; }
-        if (!currentOobCode) { pwError.textContent = 'Missing verification code.'; pwError.style.display = 'block'; return; }
+        if (a.length < 6) { pwError.style.color = '#E7329B'; pwError.textContent = 'Password must be at least 6 characters.'; pwError.style.display = 'block'; return; }
+        if (a !== b) { pwError.style.color = '#E7329B'; pwError.textContent = 'Passwords do not match.'; pwError.style.display = 'block'; return; }
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving…';
 
         try {
-            await firebase.auth().confirmPasswordReset(currentOobCode, a);
-            // success
+            await firebase.auth().confirmPasswordReset(oobCode, a);
             pwError.style.color = '#0a8a0a';
-            pwError.textContent = 'Password updated. Redirecting to login...';
+            pwError.textContent = '✅ Password updated! Redirecting to login…';
             pwError.style.display = 'block';
-            setTimeout(() => window.location.href = '/login', 1400);
+            setTimeout(() => window.location.href = '/login', 1500);
         } catch (err) {
             pwError.style.color = '#E7329B';
-            pwError.textContent = err?.message || 'Could not update password.';
+            pwError.textContent = err?.message || 'Could not update password. Please request a new reset link.';
             pwError.style.display = 'block';
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save New Password';
         }
     });
 
@@ -131,72 +207,5 @@ function showPasswordStep() {
     stepsContainer.appendChild(pw1);
     stepsContainer.appendChild(pw2);
     stepsContainer.appendChild(pwError);
-    stepsContainer.appendChild(createBtn);
+    stepsContainer.appendChild(saveBtn);
 }
-
-sendCodeBtn.addEventListener('click', async () => {
-    showError('');
-    clearSteps();
-    const email = (emailInput.value || '').trim();
-    if (!email) { showError('Please enter your email.'); return; }
-
-    try {
-        // Check which sign-in methods exist for this email
-        const methods = await firebase.auth().fetchSignInMethodsForEmail(email);
-        console.log('fetchSignInMethodsForEmail ->', email, methods);
-        if (!methods || methods.length === 0) {
-            showError('No Firebase account found for this email. Did you register via the site or use Google sign-in?');
-            return;
-        }
-
-        // If account uses Google-only, instruct the user to use Google login
-        if (methods.includes('google.com') && !methods.includes('password')) {
-            showError('This account uses Google Sign-In. Please sign in with Google instead.');
-            return;
-        }
-
-        // Send password reset email (Firebase will send an oobCode inside the link)
-        await firebase.auth().sendPasswordResetEmail(email);
-        targetEmail = email;
-        sessionStorage.setItem('forgotEmail', email);
-        showCodeStep();
-    } catch (err) {
-        console.error('sendCode error', err);
-        showError(err?.message || 'Could not send verification email. Check console for details.');
-    }
-});
-
-// Optionally auto-fill if browser restored value
-window.addEventListener('load', () => {
-    const saved = sessionStorage.getItem('forgotEmail');
-    if (saved && emailInput) emailInput.value = saved;
-});
-
-// Handle deep link from Firebase email (oobCode)
-(function handleActionLink() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const oobCode = params.get('oobCode');
-        const mode = params.get('mode');
-        if (!oobCode) return;
-
-        // If this is a resetPassword action, verify code and go straight to password step
-        if (mode === 'resetPassword') {
-            firebase.auth().verifyPasswordResetCode(oobCode)
-                .then(email => {
-                    // remember target email and code
-                    targetEmail = email;
-                    currentOobCode = oobCode;
-                    if (emailInput) emailInput.value = email;
-                    // show password form directly
-                    showPasswordStep();
-                })
-                .catch(err => {
-                    console.error('oobCode verify failed', err);
-                    showError('Invalid or expired password reset link.');
-                });
-        }
-    } catch (e) {
-        console.error('handleActionLink error', e);
-    }
-})();

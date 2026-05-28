@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/preview.css">
     <!-- CSRF token so the upload POST is accepted by Laravel -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="/js/navbar-prerender.js"></script>
 </head>
 <body>
     <div class="background">
@@ -24,7 +25,7 @@
             <li><a href="/gallery">Gallery</a></li>
         </ul>
         <div class="nav-right">
-            <button class="login-btn" onclick="window.location.href='/login'">Login</button>
+            <button id="nav-login-btn" class="login-btn" onclick="window.location.href='/login'">Login</button>
             <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
         </div>
     </nav>

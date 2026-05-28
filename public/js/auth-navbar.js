@@ -3,6 +3,23 @@ const navLoginBtn = document.getElementById('nav-login-btn')
     || document.querySelector('#navbar .nav-right .login-btn')
     || document.querySelector('.login-btn');
 
+// Store the current user label so we can restore it on mouseleave
+let currentUserLabel = sessionStorage.getItem('firebaseUserName') || '';
+
+// ── Instant pre-render from sessionStorage (no async delay) ──────────────────
+// Runs synchronously at parse time so the button is correct before any
+// Firebase async call fires, eliminating the Login→username flash.
+(function preRenderNavBtn() {
+    if (!navLoginBtn) return;
+    const saved = sessionStorage.getItem('firebaseUserName')
+               || (sessionStorage.getItem('firebaseToken') ? 'My Account' : null);
+    if (saved) {
+        currentUserLabel = saved;
+        navLoginBtn.textContent = saved;
+        navLoginBtn.title = 'Click to log out';
+    }
+    // If nothing in sessionStorage, keep the default "Login" from HTML
+})();
 async function syncFirebaseToken(user) {
     if (!user) {
         sessionStorage.removeItem('firebaseToken');
@@ -25,77 +42,66 @@ function updateNavButton(user) {
 
     if (user) {
         // Prefer an explicit name stored at registration, then Firebase displayName, then email
-        const label = sessionStorage.getItem('firebaseUserName') || user.displayName || user.email || 'My Account';
-        navLoginBtn.textContent = label;
-        navLoginBtn.onclick = () => window.location.href = '/gallery';
-        navLoginBtn.title = 'Open your gallery';
-        ensureAccountMenu();
+        currentUserLabel = sessionStorage.getItem('firebaseUserName') || user.displayName || user.email || 'My Account';
+        navLoginBtn.textContent = currentUserLabel;
+        navLoginBtn.title = 'Click to log out';
+
+        // Remove old click listener and add logout-aware one
+        navLoginBtn.onclick = null;
+        navLoginBtn._authClickHandler && navLoginBtn.removeEventListener('click', navLoginBtn._authClickHandler);
+
+        navLoginBtn._authClickHandler = async () => {
+            try { if (window.firebase && firebase.auth) await firebase.auth().signOut(); } catch (err) { }
+            if (window.BoothAPI?.logout) BoothAPI.logout();
+            sessionStorage.removeItem('firebaseUserName');
+            sessionStorage.removeItem('firebaseToken');
+            window.location.href = '/';
+        };
+        navLoginBtn.addEventListener('click', navLoginBtn._authClickHandler);
+
+        // Hover: swap text to "Log Out" with a short delay for a natural feel
+        navLoginBtn._hoverEnter && navLoginBtn.removeEventListener('mouseenter', navLoginBtn._hoverEnter);
+        navLoginBtn._hoverLeave && navLoginBtn.removeEventListener('mouseleave', navLoginBtn._hoverLeave);
+
+        let hoverTimeout = null;
+
+        navLoginBtn._hoverEnter = () => {
+            hoverTimeout = setTimeout(() => {
+                navLoginBtn.textContent = 'Log Out';
+            }, 100);
+        };
+        navLoginBtn._hoverLeave = () => {
+            clearTimeout(hoverTimeout);
+            navLoginBtn.textContent = currentUserLabel;
+        };
+
+        navLoginBtn.addEventListener('mouseenter', navLoginBtn._hoverEnter);
+        navLoginBtn.addEventListener('mouseleave', navLoginBtn._hoverLeave);
+
+        removeAccountMenu();
     } else {
+        currentUserLabel = '';
         navLoginBtn.textContent = 'Login';
-        navLoginBtn.onclick = () => window.location.href = '/login';
         navLoginBtn.title = 'Login or register';
+
+        // Remove logout click handler
+        navLoginBtn._authClickHandler && navLoginBtn.removeEventListener('click', navLoginBtn._authClickHandler);
+        navLoginBtn._authClickHandler = null;
+
+        // Remove hover handlers
+        navLoginBtn._hoverEnter && navLoginBtn.removeEventListener('mouseenter', navLoginBtn._hoverEnter);
+        navLoginBtn._hoverLeave && navLoginBtn.removeEventListener('mouseleave', navLoginBtn._hoverLeave);
+        navLoginBtn._hoverEnter = null;
+        navLoginBtn._hoverLeave = null;
+
+        navLoginBtn.onclick = () => window.location.href = '/login';
+
         removeAccountMenu();
     }
 }
 
-// Create a small hover menu with a Logout action when user is logged in
+// Kept for cleanup compatibility (no longer creates a menu)
 let accountMenuEl = null;
-function ensureAccountMenu() {
-    if (!navLoginBtn || accountMenuEl) return;
-    const parent = navLoginBtn.parentElement || document.body;
-
-    accountMenuEl = document.createElement('div');
-    accountMenuEl.className = 'account-menu';
-    accountMenuEl.style.position = 'absolute';
-    accountMenuEl.style.display = 'none';
-    accountMenuEl.style.minWidth = '140px';
-    accountMenuEl.style.background = '#FFAFD5';
-    accountMenuEl.style.border = '1px solid rgba(142, 142, 142, 0.52)';
-    accountMenuEl.style.boxShadow = '0 6px 18px rgba(0,0,0,0.08)';
-    accountMenuEl.style.padding = '6px 0';
-    accountMenuEl.style.borderRadius = '6px';
-    accountMenuEl.style.zIndex = 9999;
-
-    const logout = document.createElement('button');
-    logout.textContent = 'Logout';
-    logout.style.color = '#FFFF';
-    logout.style.display = 'block';
-    logout.style.width = '100%';
-    logout.style.padding = '5px 8px';
-    logout.style.border = 'none';
-    logout.style.background = 'transparent';
-    logout.style.textAlign = 'center';
-    logout.style.cursor = 'pointer';
-
-    logout.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        try { if (window.firebase && firebase.auth) await firebase.auth().signOut(); } catch (err) { }
-        if (window.BoothAPI?.logout) BoothAPI.logout();
-        sessionStorage.removeItem('firebaseUserName');
-        // Ensure token cleared
-        sessionStorage.removeItem('firebaseToken');
-        window.location.href = '/';
-    });
-
-    accountMenuEl.appendChild(logout);
-    document.body.appendChild(accountMenuEl);
-
-    function showMenu() {
-        const rect = navLoginBtn.getBoundingClientRect();
-        accountMenuEl.style.left = (rect.left) + 'px';
-        accountMenuEl.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
-        accountMenuEl.style.display = 'block';
-    }
-
-    function hideMenu() {
-        accountMenuEl.style.display = 'none';
-    }
-
-    navLoginBtn.addEventListener('mouseenter', showMenu);
-    navLoginBtn.addEventListener('mouseleave', () => setTimeout(() => { if (!accountMenuEl.matches(':hover')) hideMenu(); }, 150));
-    accountMenuEl.addEventListener('mouseleave', hideMenu);
-    accountMenuEl.addEventListener('mouseenter', () => accountMenuEl.style.display = 'block');
-}
 
 function removeAccountMenu() {
     if (!accountMenuEl) return;

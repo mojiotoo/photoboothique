@@ -23,8 +23,8 @@ Route::get('/preview', fn() => view('preview'))->name('preview');
 Route::get('/qrcode', fn() => view('qrcode'))->name('qrcode');
 Route::get('/gallery', fn() => view('gallery'))->name('gallery');
 Route::get('/login',        fn() => file_get_contents(resource_path('views/login.html')));
-Route::get('/forgot-password',        fn() => file_get_contents(resource_path('views/forgot-password.html')));
-Route::get('/new-password',        fn() => file_get_contents(resource_path('views/new-password.html')));
+Route::get('/forgot-password', fn() => file_get_contents(resource_path('views/forgot-password.html')));
+Route::get('/new-password',    fn() => file_get_contents(resource_path('views/new-password.html')));
 Route::get('/register',        fn() => file_get_contents(resource_path('views/register.html')));
 
 

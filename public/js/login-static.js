@@ -46,9 +46,25 @@ if (loginForm) {
             if (credentials.user?.displayName) sessionStorage.setItem('firebaseUserName', credentials.user.displayName);
             window.location.href = '/';
         } catch (error) {
-            showLoginError(error?.message || 'Login failed. Please try again.');
+            const friendlyError = getFirebaseLoginError(error);
+            showLoginError(friendlyError);
         }
     });
+}
+
+function getFirebaseLoginError(error) {
+    const code = error?.code || '';
+    const friendlyMessages = {
+        'auth/invalid-login-credentials': 'Your username or password is incorrect.',
+        'auth/invalid-credential':        'Your username or password is incorrect.',
+        'auth/wrong-password':            'Your username or password is incorrect.',
+        'auth/user-not-found':            'Your username or password is incorrect.',
+        'auth/invalid-email':             'Please enter a valid email address.',
+        'auth/user-disabled':             'This account has been disabled. Please contact support.',
+        'auth/too-many-requests':         'Too many failed attempts. Please try again later.',
+        'auth/network-request-failed':    'Network error. Please check your connection and try again.',
+    };
+    return friendlyMessages[code] || 'Login failed. Please try again.';
 }
 
 if (googleButton) {
@@ -69,7 +85,7 @@ if (googleButton) {
             if (result.user?.displayName) sessionStorage.setItem('firebaseUserName', result.user.displayName);
             window.location.href = '/';
         } catch (error) {
-            showLoginError(error?.message || 'Google login failed. Please try again.');
+            showLoginError(getFirebaseLoginError(error));
         }
     });
 }

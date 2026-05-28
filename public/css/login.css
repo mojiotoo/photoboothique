@@ -1,11 +1,9 @@
 /* ── LOGIN BOX ── */
 .box {
-    background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.73) 0%,
-        rgba(228, 204, 255, 0.175) 50%,
-        rgba(255, 250, 231, 0.73) 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.73) 0%,
+            rgba(228, 204, 255, 0.175) 50%,
+            rgba(255, 250, 231, 0.73) 100%);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     border-radius: 28px;
@@ -22,8 +20,15 @@
 }
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(28px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── LEFT SIDE IMAGE ── */
@@ -154,7 +159,7 @@ input[type="password"].input-field {
 }
 
 .forgot-link:hover {
-    color:#2265EC;
+    color: #2265EC;
 }
 
 /* ── FIX 4: BUTTONS — not too long ── */
@@ -201,7 +206,7 @@ input[type="password"].input-field {
 }
 
 /* ── OR SEPARATOR ── */
-.login-content > p {
+.login-content>p {
     font-size: 13px;
     color: #8BB1FF;
     text-align: center;

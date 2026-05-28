@@ -7,6 +7,20 @@ function showRegisterError(message) {
     registerError.style.display = message ? 'block' : 'none';
 }
 
+function getFriendlyRegisterError(error) {
+    const code = error?.code || '';
+    const friendlyMessages = {
+        'auth/email-already-in-use':      'An account with this email already exists.',
+        'auth/invalid-email':             'Please enter a valid email address.',
+        'auth/weak-password':             'Password must be at least 6 characters.',
+        'auth/operation-not-allowed':     'Registration is currently disabled. Please contact support.',
+        'auth/network-request-failed':    'Network error. Please check your connection and try again.',
+        'auth/too-many-requests':         'Too many attempts. Please try again later.',
+        'auth/popup-closed-by-user':      'Sign-in was cancelled.',
+    };
+    return friendlyMessages[code] || 'Registration failed. Please try again.';
+}
+
 if (registerForm) {
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -45,8 +59,7 @@ if (registerForm) {
             sessionStorage.setItem('firebaseUserName', name);
             window.location.href = '/';
         } catch (error) {
-            const message = error?.message || 'Registration failed. Please try again.';
-            showRegisterError(message);
+            showRegisterError(getFriendlyRegisterError(error));
         }
     });
 }

@@ -6,6 +6,7 @@
     <title>Login</title>
     <link rel="stylesheet" href="../css/layout.css">
     <link rel="stylesheet" href="../css/register.css">
+    <script src="/js/navbar-prerender.js"></script>
 </head>
 <body>
     <div class="background">
@@ -21,7 +22,7 @@
             <li><a href="/gallery">Gallery</a></li>
         </ul>
         <div class="nav-right">
-            <button class="login-btn" onclick="window.location.href='/login'">Login</button>
+            <button id="nav-login-btn" class="login-btn" onclick="window.location.href='/login'">Login</button>
             <button class="hamburger" onclick="toggleMenu()">☰</button>
         </div>
     </nav>
@@ -92,6 +93,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
     <script src="/js/api.js"></script>
+    <script src="/js/auth-navbar.js"></script>
     <script src="/js/register-static.js"></script>
 </body>
 </html>
