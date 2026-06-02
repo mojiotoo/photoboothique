@@ -134,43 +134,38 @@
         async function uploadAndContinue() {
             const btn = document.getElementById('downloadBtn');
             btn.disabled = true;
-            btn.textContent = 'Uploading...';
+            btn.textContent = 'Loading...';
 
             try {
-                const token = document.querySelector('meta[name="csrf-token"]').content;
+                // Strip is ALREADY saved by editFrame.js — do NOT upload again.
+                const stripId = new URLSearchParams(location.search).get('strip_id')
+                            || sessionStorage.getItem('boothStripId');
 
-                // Tambah ini — ambil Firebase ID token
-                const firebaseToken = user ? await user.getIdToken() : 'dev-token';
+                let qrUrl         = sessionStorage.getItem('qrUrl');
+                let stripImageUrl = sessionStorage.getItem('stripImageUrl');
 
-                const response = await fetch('/strip/save', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': token,
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + firebaseToken,  // ← tambah ini
-                    },
-                    body: JSON.stringify({
-                        image_base64: stripDataURL,
-                        frame_type: stripFrame || 'default',
-                    }),
-                });
-
-                if (!response.ok) {
-                    const err = await response.json();
-                    console.error(err);
-                    throw new Error('Upload failed: ' + response.status);
+                // If URLs aren't in sessionStorage, fetch them from the server using the id.
+                if (stripId && (!qrUrl || !stripImageUrl)) {
+                    const res = await fetch(`/strip/${stripId}`, {
+                        headers: { 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        qrUrl         = data.qr_url;
+                        stripImageUrl = data.cloudinary_url;
+                    }
                 }
 
-                const data = await response.json();
+                if (!qrUrl || !stripImageUrl) throw new Error('Strip not found on server');
 
-                sessionStorage.setItem('qrUrl', data.qr_url);
-                sessionStorage.setItem('stripImageUrl', data.cloudinary_url); // ← sesuaikan key
-
+                sessionStorage.setItem('qrUrl', qrUrl);
+                sessionStorage.setItem('stripImageUrl', stripImageUrl);
                 window.location.href = '/qrcode';
 
             } catch (err) {
                 console.error(err);
-                alert('Could not upload your photo strip. Please try again.');
+                alert('Could not load your photo strip. Please try again.');
                 btn.disabled = false;
                 btn.textContent = 'Download Photo';
             }
