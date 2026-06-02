@@ -54,6 +54,25 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Deploying to Vercel
+
+This repository includes `vercel.json` to deploy the Laravel backend and built frontend assets together.
+
+Required production environment variables on Vercel:
+
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_URL=https://your-app.vercel.app`
+- `APP_KEY=` (a valid Laravel app key)
+- `CLOUDINARY_CLOUD_NAME=`
+- `CLOUDINARY_API_KEY=`
+- `CLOUDINARY_API_SECRET=`
+- `FIREBASE_CREDENTIALS_JSON=` (multiline service account JSON)
+
+On Vercel, set the project Build Command to `npm install && npm run build` and the Output Directory to `public`.
+
+If you need a persistent database in production, do not use `DB_CONNECTION=sqlite` on Vercel. Use a hosted MySQL or PostgreSQL database and set the corresponding `DB_*` variables.
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

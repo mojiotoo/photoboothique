@@ -101,35 +101,48 @@ class FirebaseAuth
         // If the Kreait Firebase SDK is installed and credentials are configured,
         // use it to verify the ID token. Otherwise fall back to a harmless
         // development stub so existing flows keep working.
-        if (class_exists(\Kreait\Firebase\Factory::class) && env('FIREBASE_CREDENTIALS')) {
-            try {
-                $credentialsPath = env('FIREBASE_CREDENTIALS');
-                if (!file_exists($credentialsPath)) {
-                    logger()->warning('FIREBASE_CREDENTIALS set but file not found: ' . $credentialsPath);
+        if (class_exists(\Kreait\Firebase\Factory::class)) {
+            $credentialsPath = env('FIREBASE_CREDENTIALS');
+            $credentialsJson = env('FIREBASE_CREDENTIALS_JSON');
+
+            if (!$credentialsPath && $credentialsJson) {
+                $tmpPath = tempnam(sys_get_temp_dir(), 'firebase_sa_');
+                if ($tmpPath !== false && file_put_contents($tmpPath, $credentialsJson) !== false) {
+                    register_shutdown_function(fn() => @unlink($tmpPath));
+                    $credentialsPath = $tmpPath;
+                } else {
+                    logger()->warning('Could not create temporary Firebase credentials file from FIREBASE_CREDENTIALS_JSON.');
+                }
+            }
+
+            if ($credentialsPath && file_exists($credentialsPath)) {
+                try {
+                    $factory = (new \Kreait\Firebase\Factory())->withServiceAccount($credentialsPath);
+                    $auth = $factory->createAuth();
+
+                    // verifyIdToken will throw if token is invalid/expired
+                    $verified = $auth->verifyIdToken($token);
+                    $claims = $verified->claims();
+
+                    return [
+                        'uid'   => $claims->get('sub'),
+                        'email' => $claims->get('email'),
+                        'name'  => $claims->get('name'),
+                    ];
+                } catch (\Throwable $e) {
+                    logger()->warning('Firebase token verification failed: ' . $e->getMessage());
                     return null;
                 }
+            }
 
-                $factory = (new \Kreait\Firebase\Factory())->withServiceAccount($credentialsPath);
-                $auth = $factory->createAuth();
-
-                // verifyIdToken will throw if token is invalid/expired
-                $verified = $auth->verifyIdToken($token);
-                $claims = $verified->claims();
-
-                return [
-                    'uid'   => $claims->get('sub'),
-                    'email' => $claims->get('email'),
-                    'name'  => $claims->get('name'),
-                ];
-            } catch (\Throwable $e) {
-                logger()->warning('Firebase token verification failed: ' . $e->getMessage());
-                return null;
+            if ($credentialsJson && empty($credentialsPath)) {
+                logger()->warning('FIREBASE_CREDENTIALS_JSON is set but the temp file could not be created.');
             }
         }
 
         // ──────────────────────────────────────────────────────────
         // DEV STUB — decodes the JWT payload without verifying the signature
-        // to extract a stable user UID ('sub' claim) for local development
+        // to extract a stable, real user UID ('sub' claim) for local development
         // when the SDK or credentials are absent.
         // ──────────────────────────────────────────────────────────
         if (empty($token)) return null;
