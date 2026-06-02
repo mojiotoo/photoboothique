@@ -79,6 +79,7 @@ const st = {
 const frameOuter    = document.getElementById('frameOuter');
 const frameSlots    = document.getElementById('frameSlots');
 const stickersLayer = document.getElementById('stickersLayer');
+const frameLogo     = document.getElementById('frameLogo');
 const frameDatetime = document.getElementById('frameDatetime');
 const rotateBtn     = document.getElementById('rotateBtn');
 const scaleSlider   = document.getElementById('scaleSlider');
@@ -313,6 +314,10 @@ function buildFrame() {
         box-sizing: border-box;
         pointer-events: none;
     `;
+    if (frameLogo) {
+        frameLogo.src = '/assets/footer.png';
+        frameLogo.style.filter = st.frameType === 'everyday-white' ? 'invert(1)' : 'none';
+    }
 
     // Click outside stickers to deselect
     frameOuter.addEventListener('click', e => {
@@ -706,7 +711,7 @@ async function exportFrame() {
         logo.onload = () => {
             const lh = 18, lw = logo.naturalWidth * (lh / logo.naturalHeight);
             const ly = cfg.frameH - cfg.footerH + (cfg.footerH - lh) / 2;
-            if (st.frameType === 'og-black') ctx.filter = 'invert(1)';
+            if (st.frameType === 'everyday-white') ctx.filter = 'invert(1)';
             ctx.drawImage(logo, 10, ly, lw, lh);
             ctx.filter = 'none'; res();
         };
