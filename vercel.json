@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "builds": [
+    { "src": "composer.json", "use": "@vercel/php" },
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "public" }}
+  ],
+  "routes": [
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|svg|ico|webp|map|json))",
+      "dest": "public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "public/index.php"
+    }
+  ]
+}
