@@ -38,8 +38,14 @@
                 <form id="register-form">
                     <input type="text" name="name" placeholder="Name" class="input-field" required />
                     <input type="email" name="email" placeholder="Email" class="input-field" required />
-                    <input type="password" name="password" placeholder="Password" class="input-field" required />
-                    <input type="password" name="password_confirmation" placeholder="Confirm Password" class="input-field" required />
+                    <div class="password-input-group">
+                        <input type="password" name="password" placeholder="Password" class="input-field password-field" required />
+                        <button type="button" class="password-toggle" aria-label="Show password">👁️</button>
+                    </div>
+                    <div class="password-input-group">
+                        <input type="password" name="password_confirmation" placeholder="Confirm Password" class="input-field password-field" required />
+                        <button type="button" class="password-toggle" aria-label="Show confirm password">👁️</button>
+                    </div>
                     <p id="register-error" style="color:#E7329B;font-size:14px;text-align:center;margin:0 0 4px;display:none;"></p>
                 </form>
                 <a href="/login" class="have-account">Already have account</a>

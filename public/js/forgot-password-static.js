@@ -101,10 +101,17 @@ sendBtn.addEventListener('click', async () => {
     if (!email) { showError('Please enter your email.'); return; }
 
     sendBtn.disabled = true;
-    sendBtn.textContent = 'Sending…';
+    sendBtn.textContent = 'Checking…';
 
     try {
-        await firebase.auth().sendPasswordResetEmail(email);
+        const auth = firebase.auth();
+        const methods = await auth.fetchSignInMethodsForEmail(email);
+        if (!methods || !methods.length) {
+            throw { code: 'auth/user-not-found' };
+        }
+
+        sendBtn.textContent = 'Sending…';
+        await auth.sendPasswordResetEmail(email);
 
         // Success — lock email field, show confirmation, show resend UI
         emailInput.disabled = true;
@@ -182,7 +189,7 @@ function showPasswordStep(oobCode) {
         pwError.style.display = 'none';
         const a = pw1.value || '';
         const b = pw2.value || '';
-        if (a.length < 6) { pwError.style.color = '#E7329B'; pwError.textContent = 'Password must be at least 6 characters.'; pwError.style.display = 'block'; return; }
+        if (a.length < 8 || a.length > 16) { pwError.style.color = '#E7329B'; pwError.textContent = 'Password must be 8-16 characters long.'; pwError.style.display = 'block'; return; }
         if (a !== b) { pwError.style.color = '#E7329B'; pwError.textContent = 'Passwords do not match.'; pwError.style.display = 'block'; return; }
 
         saveBtn.disabled = true;

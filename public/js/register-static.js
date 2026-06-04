@@ -7,18 +7,71 @@ function showRegisterError(message) {
     registerError.style.display = message ? 'block' : 'none';
 }
 
+function setupPasswordToggles() {
+    document.querySelectorAll('.password-toggle').forEach((toggle) => {
+        const group = toggle.closest('.password-input-group');
+        const input = group?.querySelector('input[type="password"]');
+        if (!input) return;
+
+        toggle.addEventListener('click', () => {
+            const isVisible = input.type === 'text';
+            input.type = isVisible ? 'password' : 'text';
+            toggle.textContent = isVisible ? '👁️' : '🙈';
+            toggle.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
+        });
+    });
+}
+
 function getFriendlyRegisterError(error) {
     const code = error?.code || '';
     const friendlyMessages = {
         'auth/email-already-in-use':      'An account with this email already exists.',
         'auth/invalid-email':             'Please enter a valid email address.',
-        'auth/weak-password':             'Password must be at least 6 characters.',
+        'auth/weak-password':             'Password must be 8-16 characters long and include uppercase, lowercase, number, and special character.',
         'auth/operation-not-allowed':     'Registration is currently disabled. Please contact support.',
         'auth/network-request-failed':    'Network error. Please check your connection and try again.',
         'auth/too-many-requests':         'Too many attempts. Please try again later.',
         'auth/popup-closed-by-user':      'Sign-in was cancelled.',
     };
     return friendlyMessages[code] || 'Registration failed. Please try again.';
+}
+
+function validateName(name) {
+    if (!/^[A-Za-z]{3,8}$/.test(name)) {
+        return 'Name must be 3-8 letters (A-Z or a-z) with no spaces or symbols.';
+    }
+    return null;
+}
+
+function getPasswordValidationErrors(password) {
+    const missing = [];
+
+    if (password.length < 8 || password.length > 16) {
+        missing.push('be 8-16 characters long');
+    }
+    if (!/[A-Z]/.test(password)) {
+        missing.push('include at least one uppercase letter');
+    }
+    if (!/[a-z]/.test(password)) {
+        missing.push('include at least one lowercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+        missing.push('include at least one number');
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+        missing.push('include at least one special character');
+    }
+
+    if (!missing.length) {
+        return null;
+    }
+
+    const last = missing.pop();
+    const message = missing.length
+        ? `Password must ${missing.join(', ')}, and ${last}.`
+        : `Password must ${last}.`;
+
+    return message;
 }
 
 if (registerForm) {
@@ -36,13 +89,20 @@ if (registerForm) {
             return;
         }
 
+        const nameError = validateName(name);
+        if (nameError) {
+            showRegisterError(nameError);
+            return;
+        }
+
         if (password !== passwordConfirmation) {
             showRegisterError('Passwords do not match.');
             return;
         }
 
-        if (password.length < 6) {
-            showRegisterError('Password must be at least 6 characters.');
+        const passwordError = getPasswordValidationErrors(password);
+        if (passwordError) {
+            showRegisterError(passwordError);
             return;
         }
 
@@ -68,3 +128,5 @@ if (registerForm) {
         }
     });
 }
+
+setupPasswordToggles();
