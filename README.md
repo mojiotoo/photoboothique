@@ -20,8 +20,6 @@ PhotoBoothique adalah aplikasi photobooth berbasis web yang memungkinkan penggun
 | Autentikasi | Firebase Auth |
 | Database | MySQL |
 
-LayerTeknologiBackendLaravelAutentikasiFirebase AuthPenyimpanan MediaCloudinaryKameraWebcam APIDatabaseMySQL 
-
 ## Cara Menjalankan 
 ### Prerequisites
 
