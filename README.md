@@ -1,78 +1,46 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PhotoBoothique
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+PhotoBoothique adalah aplikasi photobooth berbasis web yang memungkinkan pengguna mengambil foto bersama teman dan keluarga kapan saja dan di mana saja. Foto dapat langsung diambil melalui kamera atau diunggah dari galeri, lalu dipercantik dengan frame, filter, dan stiker sebelum disimpan otomatis ke galeri cloud dan dibagikan lewat QR code.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Sesi Foto Langsung:** Ambil foto langsung dari kamera perangkat menggunakan Webcam API
+- **Upload Foto**: Unggah foto yang sudah ada dari galeri sebagai alternatif sesi foto langsung
+- **Edit dengan Stiker & Filter:** Kustomisasi hasil foto dengan frame, filter, dan stiker lucu sebelum disimpan
+- **Galeri Foto Tersinkronisasi:** Semua hasil foto tersimpan otomatis ke akun pengguna dan dapat diakses kapan saja
+- **Download via QR Code:** Bagikan dan unduh foto strip dengan cepat cukup dengan memindai QR code
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Layer | Teknologi |
+|---|---|
+| Frontend | React.js, Tailwind CSS v4 |
+| Backend | Laravel |
+| Media Storage | Cloudinary |
+| Autentikasi | Firebase Auth |
+| Database | MySQL |
 
-## Learning Laravel
+LayerTeknologiBackendLaravelAutentikasiFirebase AuthPenyimpanan MediaCloudinaryKameraWebcam APIDatabaseMySQL 
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Cara Menjalankan 
+### Prerequisites
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP >= 8.2 & laravel/framework >= 12.0
+- Composer
+- Node.js >= 18 & npm
+- MySQL
 
-## Laravel Sponsors
+### Install & Run
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+git clone https://github.com/your-org/photoboothique.git
+cd photoboothique
+composer install
+php artisan key:generate
 
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## Deploying to Vercel
-
-This repository includes `vercel.json` to deploy the Laravel backend and built frontend assets together.
-
-Required production environment variables on Vercel:
-
-- `APP_ENV=production`
-- `APP_DEBUG=false`
-- `APP_URL=https://your-app.vercel.app`
-- `APP_KEY=` (a valid Laravel app key)
-- `CLOUDINARY_CLOUD_NAME=`
-- `CLOUDINARY_API_KEY=`
-- `CLOUDINARY_API_SECRET=`
-- `FIREBASE_CREDENTIALS_JSON=` (multiline service account JSON)
-
-On Vercel, set the project Build Command to `npm install && npm run build` and the Output Directory to `public`.
-
-If you need a persistent database in production, do not use `DB_CONNECTION=sqlite` on Vercel. Use a hosted MySQL or PostgreSQL database and set the corresponding `DB_*` variables.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+npm install
+npm run build
+php artisan migrate
+php artisan serve
+```
+App akan berjalan di `http://localhost:8000`
