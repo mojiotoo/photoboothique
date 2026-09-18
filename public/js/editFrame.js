@@ -54,6 +54,78 @@ const FRAME_CONFIGS = {
     'everyday-white':    { pngSrc: '/assets/everydaywhite.png',   bgColor: '#fff',    layout: 'grid-2x2', frameW: 280, frameH: 500, footerH: 50, gap: 4,  pad: 6  },
     'shimmer-pink':      { pngSrc: '/assets/shimmer-pink.png',    bgColor: '#f0d4fa', layout: 'grid-2x2', frameW: 280, frameH: 380, footerH: 50, gap: 4,  pad: 10 },
     'og-black':          { pngSrc: '/assets/ogblack.png',         bgColor: '#111',    layout: 'grid-2x2', frameW: 360, frameH: 400, footerH: 48, gap: 5,  pad: 8  },
+    'monchichi': {
+        pngSrc: '/assets/monchichi.png', bgColor: '#fff', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 10, y: 85, w: 180, h: 155, shape: 'rounded' },
+            { x: 18, y: 240, w: 164, h: 160, shape: 'rounded' },
+            { x: 14, y: 410, w: 172, h: 159, shape: 'rounded' },
+        ],
+    },
+    'pinkpolkadot': {
+        pngSrc: '/assets/pinkpolkadot.png', bgColor: '#fde8f3', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 15, y: 88, w: 176, h: 160, shape: 'rounded' },
+            { x: 18, y: 250, w: 164, h: 173, shape: 'organic' },
+            { x: 18, y: 420, w: 172, h: 160, shape: 'rounded' },
+        ],
+    },
+    'bluepolkadot': {
+        pngSrc: '/assets/bluepolkadot.png', bgColor: '#e1f8ff', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 25, y: 76, w: 150, h: 154, shape: 'rounded' },
+            { x: 25, y: 235, w: 150, h: 154, shape: 'rounded' },
+            { x: 25, y: 400, w: 150, h: 154, shape: 'rounded' },
+        ],
+    },
+    'blueribbon': {
+        pngSrc: '/assets/blueribbon.png', bgColor: '#fff', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 23, y: 66, w: 157, h: 120, shape: 'rounded' },
+            { x: 21, y: 196, w: 159, h: 146, shape: 'rounded' },
+            { x: 22, y: 355, w: 156, h: 117, shape: 'rounded' },
+        ],
+    },
+    'snoopy': {
+        pngSrc: '/assets/snoopy.png', bgColor: '#fff', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 20, y: 76, w: 160, h: 170, shape: 'rounded' },
+            { x: 20, y: 245, w: 160, h: 154, shape: 'rounded' },
+            { x: 20, y: 410, w: 160, h: 154, shape: 'rounded' },
+        ],
+    },
+    'y2kblack': {
+        pngSrc: '/assets/y2kblack.png', bgColor: '#323232', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 20, y: 64, w: 160, h: 160, shape: 'circle' },
+            { x: 20, y: 242, w: 160, h: 160, shape: 'rounded' },
+            { x: 20, y: 417, w: 160, h: 160, shape: 'circle' },
+        ],
+    },
+    'zootopia': {
+        pngSrc: '/assets/zootopia.png', bgColor: '#ff9c70', frameW: 300, frameH: 393, footerH: 0,
+        editorMaxH: 393, showFooter: false,
+        slotRects: [
+            { x: 20, y: 26, w: 135, h: 150, shape: 'rounded' },
+            { x:150, y: 26, w: 135, h: 150, shape: 'rounded' },
+            { x: 20, y: 185, w: 260, h: 156, shape: 'rounded' },
+        ],
+    },
+    'pochacco': {
+        pngSrc: '/assets/pochacco.png', bgColor: '#fff', frameW: 200, frameH: 600, footerH: 0,
+        editorMaxH: 520, showFooter: false,
+        slotRects: [
+            { x: 25, y: 90, w: 150, h: 115, shape: 'rounded' },
+            { x: 25, y: 225, w: 150, h: 115, shape: 'rounded' },
+            { x: 25, y: 365, w: 150, h: 115, shape: 'rounded' },
+        ],
+    },
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -171,7 +243,7 @@ function scaleFrameToFit() {
     const availW = area.clientWidth  - 12;
     if (!availH || !availW) return;
 
-    const scaleH = availH / st.cfg.frameH;
+    const scaleH = Math.min(availH / st.cfg.frameH, (st.cfg.editorMaxH || st.cfg.frameH) / st.cfg.frameH);
     const scaleW = availW / st.cfg.frameW;
     const scale  = Math.min(scaleH, scaleW, 1);
 
@@ -207,37 +279,34 @@ function buildFrame() {
     frameOuter.style.background = cfg.bgColor;
     frameOuter.style.position   = 'relative';
 
-    // ── Slot layout ──
-    let slotCount, cols, rows;
-    if      (cfg.layout === 'strip-4')  { slotCount = 4; cols = 1; rows = 4; }
-    else if (cfg.layout === 'grid-2x2') { slotCount = 4; cols = 2; rows = 2; }
-    else                                { slotCount = 1; cols = 1; rows = 1; }
+    const slotRects = getSlotRects(cfg);
+    const slotCount = slotRects.length;
 
     st.slots = Array.from({ length: slotCount }, () =>
         ({ photoIndex: null, rotation: 0, scale: 1, panX: 0, panY: 0 })
     );
-
-    const contentH = cfg.frameH - cfg.footerH;
 
     // Photos go at z-index 1 — BELOW the PNG frame
     frameSlots.style.cssText = `
         position: absolute;
         top: 0; left: 0;
         width: 100%;
-        height: ${contentH}px;
-        display: grid;
-        grid-template-columns: repeat(${cols}, 1fr);
-        grid-template-rows: repeat(${rows}, 1fr);
-        gap: ${cfg.gap}px;
-        padding: ${cfg.pad}px;
+        height: ${cfg.frameH}px;
         z-index: 1;
         box-sizing: border-box;
     `;
 
     for (let i = 0; i < slotCount; i++) {
+        const rect = slotRects[i];
         const slot = document.createElement('div');
         slot.className = 'frame-slot';
         slot.dataset.i = i;
+        slot.style.position = 'absolute';
+        slot.style.left = rect.x + 'px';
+        slot.style.top = rect.y + 'px';
+        slot.style.width = rect.w + 'px';
+        slot.style.height = rect.h + 'px';
+        applySlotShape(slot, rect);
 
         const ph = document.createElement('div');
         ph.className   = 'slot-ph';
@@ -313,6 +382,7 @@ function buildFrame() {
         box-sizing: border-box;
         pointer-events: none;
     `;
+    footer.style.display = cfg.showFooter === false ? 'none' : 'flex';
     if (frameLogo) {
         frameLogo.src = '/assets/footer.png';
         frameLogo.style.filter = st.frameType === 'everyday-white' ? 'invert(1)' : 'none';
@@ -322,6 +392,57 @@ function buildFrame() {
     frameOuter.addEventListener('click', e => {
         if (!e.target.closest('.placed-sticker')) deselectSticker();
     });
+}
+
+function getSlotRects(cfg) {
+    if (cfg.slotRects) return cfg.slotRects;
+
+    const contentH = cfg.frameH - cfg.footerH;
+    if (cfg.layout === 'strip-4') {
+        const h = (contentH - cfg.pad * 2 - cfg.gap * 3) / 4;
+        return Array.from({ length: 4 }, (_, i) => ({
+            x: cfg.pad, y: cfg.pad + i * (h + cfg.gap), w: cfg.frameW - cfg.pad * 2, h,
+        }));
+    }
+    if (cfg.layout === 'grid-2x2') {
+        const w = (cfg.frameW - cfg.pad * 2 - cfg.gap) / 2;
+        const h = (contentH - cfg.pad * 2 - cfg.gap) / 2;
+        return [0, 1, 2, 3].map(index => ({
+            x: cfg.pad + (index % 2) * (w + cfg.gap),
+            y: cfg.pad + Math.floor(index / 2) * (h + cfg.gap), w, h,
+        }));
+    }
+    return [{ x: cfg.pad, y: cfg.pad, w: cfg.frameW - cfg.pad * 2, h: contentH - cfg.pad * 2 }];
+}
+
+function applySlotShape(slot, rect) {
+    if (rect.shape === 'circle') slot.style.borderRadius = '50%';
+    if (rect.shape === 'rounded') slot.style.borderRadius = '8%';
+    if (rect.shape === 'heart') slot.style.clipPath = 'polygon(50% 100%, 8% 58%, 3% 38%, 8% 16%, 25% 4%, 50% 25%, 75% 4%, 92% 16%, 97% 38%, 92% 58%)';
+    if (rect.shape === 'organic') slot.style.borderRadius = '45% 55% 48% 52% / 48% 42% 58% 52%';
+}
+
+function clipSlot(ctx, rect) {
+    ctx.beginPath();
+
+    if (rect.shape === 'circle') {
+        ctx.ellipse(
+            rect.x + rect.w / 2,
+            rect.y + rect.h / 2,
+            rect.w / 2,
+            rect.h / 2,
+            0,
+            0,
+            Math.PI * 2
+        );
+    } else if (rect.shape === 'rounded') {
+        const radius = Math.min(rect.w, rect.h) * 0.08;
+        ctx.roundRect(rect.x, rect.y, rect.w, rect.h, radius);
+    } else {
+        ctx.rect(rect.x, rect.y, rect.w, rect.h);
+    }
+
+    ctx.clip();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -651,31 +772,22 @@ async function exportFrame() {
     const cfg    = st.cfg;
     const canvas = document.getElementById('exportCanvas');
     const ctx    = canvas.getContext('2d');
-    const S      = 2;
+    // Export at a higher resolution than the editor preview so the downloaded
+    // strip is not limited by the small on-screen frame dimensions.
+    const S      = 4;
 
     canvas.width  = cfg.frameW * S;
     canvas.height = cfg.frameH * S;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.scale(S, S);
 
     // Background
     ctx.fillStyle = cfg.bgColor || '#fff';
     ctx.fillRect(0, 0, cfg.frameW, cfg.frameH);
 
-    // Slot rects
-    const contentH = cfg.frameH - cfg.footerH;
-    const { pad, gap, layout } = cfg;
-    let rects = [];
-    if (layout === 'strip-4') {
-        const h = (contentH - pad*2 - gap*3) / 4, w = cfg.frameW - pad*2;
-        for (let i = 0; i < 4; i++) rects.push({ x: pad, y: pad + i*(h+gap), w, h });
-    } else if (layout === 'grid-2x2') {
-        const w = (cfg.frameW - pad*2 - gap) / 2, h = (contentH - pad*2 - gap) / 2;
-        for (let r = 0; r < 2; r++)
-            for (let c = 0; c < 2; c++)
-                rects.push({ x: pad + c*(w+gap), y: pad + r*(h+gap), w, h });
-    } else {
-        rects.push({ x: pad, y: pad, w: cfg.frameW - pad*2, h: contentH - pad*2 });
-    }
+    // Slot rects match the editor layout, including custom frames.
+    const rects = getSlotRects(cfg);
 
     // Draw photos FIRST (below frame PNG)
     for (let i = 0; i < st.slots.length; i++) {
@@ -685,15 +797,17 @@ async function exportFrame() {
             const img = new Image();
             img.onload = () => {
                 ctx.save();
-                ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+                clipSlot(ctx, r);
                 const cx = r.x + r.w/2, cy = r.y + r.h/2;
-                ctx.translate(cx + s.panX, cy + s.panY);
+                ctx.translate(cx, cy);
                 ctx.rotate(s.rotation * Math.PI/180);
                 const ar = img.naturalWidth / img.naturalHeight, sr = r.w / r.h;
                 let dw, dh;
                 if (ar > sr) { dw = r.w * s.scale; dh = dw / ar; }
                 else         { dh = r.h * s.scale; dw = dh * ar; }
-                ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+                ctx.scale(s.scale, s.scale);
+                ctx.translate(s.panX, s.panY);
+                ctx.drawImage(img, -dw/(2 * s.scale), -dh/(2 * s.scale), dw/s.scale, dh/s.scale);
                 ctx.restore(); res();
             };
             img.onerror = res; img.src = st.photos[s.photoIndex];
@@ -713,6 +827,7 @@ async function exportFrame() {
 
     // Draw logo
     await new Promise(res => {
+        if (cfg.showFooter === false) { res(); return; }
         const logo = new Image();
         logo.onload = () => {
             const lh = 18, lw = logo.naturalWidth * (lh / logo.naturalHeight);
@@ -725,7 +840,7 @@ async function exportFrame() {
     });
 
     // Date/time
-    if (st.addDate || st.addTime) {
+    if ((st.addDate || st.addTime) && cfg.showFooter !== false) {
         const dtColors = {
             'classic-baby-pink': '#7a3050',
             'everyday-white':    '#555',
@@ -762,7 +877,7 @@ async function exportFrame() {
         });
     }
 
-    return canvas.toDataURL('image/jpeg', 0.93);
+    return canvas.toDataURL('image/jpeg', 0.98);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -814,6 +929,10 @@ async function goPreview() {
             addDate:     st.addDate,
             addTime:     st.addTime,
         });
+
+        // Replace any URLs left over from an earlier session.
+        if (strip.qr_url) sessionStorage.setItem('qrUrl', strip.qr_url);
+        if (strip.cloudinary_url) sessionStorage.setItem('stripImageUrl', strip.cloudinary_url);
 
         window.location.href = `/preview?strip_id=${strip.strip_id}`;
 

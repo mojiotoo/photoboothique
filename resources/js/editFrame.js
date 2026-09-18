@@ -836,6 +836,10 @@ async function goPreview() {
             addTime:     st.addTime,
         });
 
+        // Replace any URLs left over from an earlier session.
+        if (strip.qr_url) sessionStorage.setItem('qrUrl', strip.qr_url);
+        if (strip.cloudinary_url) sessionStorage.setItem('stripImageUrl', strip.cloudinary_url);
+
         // ── PENTING ──────────────────────────────────────────────
         // Upload sudah berhasil di sini, dan controller balikin
         // qr_url + cloudinary_url. Simpan supaya halaman preview /

@@ -30,26 +30,70 @@
     <main>
     <div class="box">
         <div class="frame-section-wrapper">
-            <div class="frame-selection">
-                <div class="frame-card" onclick="selectFrame('classic-baby-pink', this)">
-                    <img src="/assets/classicbabypink.png" alt="Classic Baby Pink" class="frame-preview classic-baby-pink">
-                    <p class="frame-name">Classic Baby Pink</p>
+            <div class="frame-carousel" aria-label="Frame options">
+                <button class="frame-arrow frame-arrow-left" type="button" aria-label="Previous frames" onclick="changeFramePage(-1)">‹</button>
+                <div class="frame-selection">
+                    <div class="frame-page active">
+                        <div class="frame-card" onclick="selectFrame('classic-baby-pink', this)">
+                            <img src="/assets/classicbabypink.png" alt="Classic Baby Pink" class="frame-preview">
+                            <p class="frame-name">Classic Baby Pink</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('everyday-white', this)">
+                            <img src="/assets/everydaywhite.png" alt="Everyday White" class="frame-preview">
+                            <p class="frame-name">Everyday White</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('shimmer-pink', this)">
+                            <img src="/assets/shimmer-pink.png" alt="Shimmer Pink" class="frame-preview">
+                            <p class="frame-name">Shimmer Pink</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('og-black', this)">
+                            <img src="/assets/ogblack.png" alt="OG Black" class="frame-preview">
+                            <p class="frame-name">OG Black</p>
+                        </div>
+                    </div>
+                    <div class="frame-page">
+                        <div class="frame-card" onclick="selectFrame('monchichi', this)">
+                            <img src="/assets/monchichi.png" alt="Monchichi" class="frame-preview">
+                            <p class="frame-name">Monchichi</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('pinkpolkadot', this)">
+                            <img src="/assets/pinkpolkadot.png" alt="Pink Polka Dot" class="frame-preview">
+                            <p class="frame-name">Pink Polka Dot</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('bluepolkadot', this)">
+                            <img src="/assets/bluepolkadot.png" alt="Blue Polka Dot" class="frame-preview">
+                            <p class="frame-name">Blue Polka Dot</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('blueribbon', this)">
+                            <img src="/assets/blueribbon.png" alt="Blue Ribbon" class="frame-preview">
+                            <p class="frame-name">Blue Ribbon</p>
+                        </div>
+                    </div>
+                    <div class="frame-page">
+                        <div class="frame-card" onclick="selectFrame('snoopy', this)">
+                            <img src="/assets/snoopy.png" alt="Snoopy" class="frame-preview">
+                            <p class="frame-name">Snoopy</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('y2kblack', this)">
+                            <img src="/assets/y2kblack.png" alt="Y2K Black" class="frame-preview">
+                            <p class="frame-name">Y2K Black</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('zootopia', this)">
+                            <img src="/assets/zootopia.png" alt="Zootopia" class="frame-preview">
+                            <p class="frame-name">Zootopia</p>
+                        </div>
+                        <div class="frame-card" onclick="selectFrame('pochacco', this)">
+                            <img src="/assets/pochacco.png" alt="Pochacco" class="frame-preview">
+                            <p class="frame-name">Pochacco</p>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="frame-card" onclick="selectFrame('everyday-white', this)">
-                    <img src="/assets/everydaywhite.png" alt="Everyday White" class="frame-preview everyday-white">
-                    <p class="frame-name">Everyday White</p>
-                </div>
-
-                <div class="frame-card" onclick="selectFrame('shimmer-pink', this)">
-                    <img src="/assets/shimmer-pink.png" alt="Shimmer Pink" class="frame-preview shimmer-pink">
-                    <p class="frame-name">Shimmer Pink</p>
-                </div>
-
-                <div class="frame-card" onclick="selectFrame('og-black', this)">
-                    <img src="/assets/ogblack.png" alt="OG Black" class="frame-preview og-black">
-                    <p class="frame-name">OG Black</p>
-                </div>
+                <button class="frame-arrow frame-arrow-right" type="button" aria-label="Next frames" onclick="changeFramePage(1)">›</button>
+            </div>
+            <div class="frame-dots" role="tablist" aria-label="Frame pages">
+                <button class="frame-dot active" type="button" role="tab" aria-label="Frame page 1" aria-selected="true" onclick="showFramePage(0)"></button>
+                <button class="frame-dot" type="button" role="tab" aria-label="Frame page 2" aria-selected="false" onclick="showFramePage(1)"></button>
+                <button class="frame-dot" type="button" role="tab" aria-label="Frame page 3" aria-selected="false" onclick="showFramePage(2)"></button>
             </div>
             <div class="frame-cta">
                 <img src="/assets/mymelody1.png" alt="My Melody" class="sticker-left">
@@ -98,6 +142,24 @@
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
+        }
+
+        let currentFramePage = 0;
+
+        function showFramePage(page) {
+            const pages = document.querySelectorAll('.frame-page');
+            const dots = document.querySelectorAll('.frame-dot');
+            currentFramePage = (page + pages.length) % pages.length;
+            pages.forEach((item, index) => item.classList.toggle('active', index === currentFramePage));
+            dots.forEach((dot, index) => {
+                const active = index === currentFramePage;
+                dot.classList.toggle('active', active);
+                dot.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+        }
+
+        function changeFramePage(direction) {
+            showFramePage(currentFramePage + direction);
         }
 
         function selectFrame(frameId, el) {

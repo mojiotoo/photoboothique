@@ -144,8 +144,9 @@
                 let qrUrl         = sessionStorage.getItem('qrUrl');
                 let stripImageUrl = sessionStorage.getItem('stripImageUrl');
 
-                // If URLs aren't in sessionStorage, fetch them from the server using the id.
-                if (stripId && (!qrUrl || !stripImageUrl)) {
+                // Always resolve the current strip ID first; sessionStorage can contain
+                // URLs from a previous photobooth session.
+                if (stripId) {
                     const res = await fetch(`/strip/${stripId}`, {
                         headers: { 'Accept': 'application/json' },
                         credentials: 'same-origin',
