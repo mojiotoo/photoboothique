@@ -3,7 +3,7 @@ builder = "NIXPACKS"
 buildCommand = "composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader && npm ci && npm run build"
 
 [deploy]
-startCommand = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
+startCommand = "php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
 healthcheckPath = "/"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
